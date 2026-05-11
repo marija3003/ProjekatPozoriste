@@ -6,9 +6,10 @@
         public string Naziv { get; set; }
 
         public int PozoristeId { get; set; }
-        public Pozoriste Pozoriste { get; set; }
 
-        // Veza sa zaposlenima koji rade na ovoj predstavi
+        public string PutanjaSlike { get; set;}
+        public Pozoriste Pozoriste { get; set; }
         public List<Zaposleni> Ucesnici { get; set; } = [];
+        public List<Termin> Termini { get; set; } = [];
     }
 }

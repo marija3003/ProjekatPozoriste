@@ -1,0 +1,31 @@
+<div class="repertoar-container">
+  <div class="repertoar-header">
+    <h1>Aktuelni Repertoar</h1>
+  </div>
+
+  <div class="grid-container" *ngIf="predstave$ | async as predstave">
+    <mat-card class="predstava-card" *ngFor="let p of predstave">
+      <img mat-card-image [src]="p.putanjaSlike" alt="Poster" class="card-img">
+      
+      <mat-card-header>
+        <mat-card-title>{{ p.naziv }}</mat-card-title>
+        <mat-card-subtitle>{{ p.nazivPozorista }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="info-row">
+          <strong>Reditelj:</strong> {{ p.reditelj }}
+        </div>
+        <div class="info-row">
+          <strong>Uloge:</strong> {{ p.glumci.length > 0 ? p.glumci.join(', ') : 'Nema dodatih glumaca' }}
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" class="buy-button" (click)="kupiKartu(p.id)">
+          Kupi kartu
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

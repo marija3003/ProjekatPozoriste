@@ -1,0 +1,122 @@
+/* Glavni kontejner */
+.repertoar-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Stil zaglavlja */
+.repertoar-header {
+  text-align: left;
+  margin-bottom: 80px;
+}
+
+.repertoar-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #2c3e50;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+/* linija ispod naslova */
+.repertoar-header::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: #3f51b5; 
+  margin: 2 auto;
+  border-radius: 2px;
+}
+
+/* Grid sistem */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+/* Stil kartice */
+.predstava-card {
+  border-radius: 15px; 
+  overflow: hidden;
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hover efekat na karticu */
+.predstava-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Slika unutar kartice */
+.card-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  background-color: #f8f9fa;
+}
+
+.predstava-card:hover .card-img {
+  transform: scale(1.05); /*  zum slike na hover */
+}
+
+/* Sadržaj kartice */
+mat-card-header {
+  padding: 20px 20px 10px 20px;
+}
+
+mat-card-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: #2c3e50;
+  margin-bottom: 7px !important;
+}
+
+mat-card-subtitle {
+  color: #3f51b5 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.8rem !important;
+  letter-spacing: 2px;
+}
+
+mat-card-content {
+  padding: 0 20px 20px 20px;
+  flex-grow: 1;
+  color: #5a6c7d;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Redovi sa informacijama (Reditelj, Glumci) */
+.info-row {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Akcije (Dugme) */
+mat-card-actions {
+  padding: 15px 20px !important;
+  background: #fcfcfc;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.buy-button {
+  border-radius: 25px !important;
+  padding: 0 25px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}

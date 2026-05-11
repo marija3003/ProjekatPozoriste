@@ -1,0 +1,66 @@
+.container{
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.form-card {
+    border-radius: 15px;
+    transition: 0.3s;
+    margin-bottom: 30px;
+}
+
+.form-card.locked {
+    background-color: #f8f9fa;
+    opacity: 0.9;
+    border: 2px solid #2ecc71;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px; 
+}
+
+.inputs{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-preview img {
+    width:100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.file-upload {
+    margin: 15px 0;
+    display:flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.grid-layout{
+    display: grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px
+}
+
+.list-card {
+    border-radius: 15px;
+    min-height: 400px; 
+}
+
+.team-card{
+    border-left: 5px solid #ff4081;
+}
+
+.empty-team {
+    text-align: centar;
+    padding: 40px;
+    color: #999;
+    font-style: italic;
+}

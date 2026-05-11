@@ -1,0 +1,81 @@
+<div class="prodaja-wrap">
+
+  <header class="header">
+    <button mat-icon-button (click)="idiNazad()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <h1>Prodaja karata</h1>
+
+    <mat-form-field appearance="fill" class="custom-select">
+      <mat-select [(ngModel)]="selectedTerminId" panelClass="topunit" (selectionChange)="onTerminChange()">
+        <mat-option *ngFor="let t of termini" [value]="t.id">
+          {{ t.datumVrijeme | date:'dd.MM.yyyy HH:mm' }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </header>
+
+  <main class="page">
+
+    <section class="sala-card">
+      <h3 class="stage">SCENA</h3>
+
+      <div class="grid">
+        <div *ngFor="let k of karte"
+             class="seat"
+             [class.taken]="k.isProdata"
+             [class.selected]="selectedKarta?.id === k.id"
+             (click)="odaberiSjediste(k)"> 
+          {{ k.brojSjedista }}
+        </div>
+      </div>
+
+      <div class="legend">
+        <div><span class="dot free"></span>Slobodno</div>
+        <div><span class="dot taken"></span>Prodato</div>
+        <div><span class="dot selected"></span>Vaš izbor</div>
+      </div>
+    </section>
+
+   <aside class="checkout-card">
+  <ng-container *ngIf="selectedKarta; else none">
+
+    <h3>Rezervacija</h3>
+
+    <div class="info-row">
+      <span>Sjedište</span>
+      <strong>{{ selectedKarta.brojSjedista }}</strong>
+    </div>
+
+    <div class="info-row price">
+      <span>Cijena</span>
+      <strong>{{ selectedKarta.cijena }} KM</strong>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-field">
+      <mat-label>Ime i prezime</mat-label>
+      <input matInput [(ngModel)]="imeKupca">
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="buy-button"
+      (click)="potvrdiKupovinu()">
+
+      Potvrdi kupovinu
+    </button>
+
+  </ng-container>
+
+  <ng-template #none>
+    <div class="empty-checkout">
+      <mat-icon>event_seat</mat-icon>
+      <p>Odaberite sjedište</p>
+    </div>
+  </ng-template>
+</aside>
+
+  </main>
+</div>

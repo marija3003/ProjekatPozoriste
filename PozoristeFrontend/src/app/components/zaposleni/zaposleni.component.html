@@ -1,0 +1,94 @@
+<mat-drawer-container class="container">
+
+  <!-- SIDE FORM -->
+  <mat-drawer #drawer mode="over" position="end" class="drawer" opened="false">
+    
+   <div class="drawer-header">
+     <h2>Novi profil zaposlenog</h2>
+   </div>
+
+    <div class="form-grid">
+      <mat-form-field  appearance="outline">
+        <mat-label>Ime</mat-label>
+        <input matInput [(ngModel)]="noviZaposleni.ime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Prezime</mat-label>
+        <input matInput [(ngModel)]="noviZaposleni.prezime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Uloga / Tip</mat-label>
+        <mat-select [(ngModel)]="noviZaposleni.tip">
+          <mat-option value="G">Glumac</mat-option>
+          <mat-option value="R">Reditelj</mat-option>
+          <mat-option value="K">Kostimograf</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Pozorište</mat-label>
+        <mat-select [(ngModel)]="noviZaposleni.pozoristeId">
+          <mat-option *ngFor="let p of pozorista" [value]="p.id">
+            {{p.naziv}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="dodajZaposlenog(); drawer.close()">
+        <mat-icon>person_add</mat-icon> Dodaj
+      </button>
+    </div>
+
+  </mat-drawer>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <div class="toolbar">
+      <button mat-raised-button color="primary" (click)="drawer.open()">
+        <mat-icon>add</mat-icon> Novi zaposleni
+      </button>
+    </div>
+
+     
+    <div class="table-container mat-elevation-z4">
+      <table mat-table [dataSource]="dataSource">
+        
+       
+        <ng-container matColumnDef="imePrezime">
+          <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Ime i prezime </th>
+          <td mat-cell style="text-align: center;" *matCellDef="let z"> {{z.imePrezime}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tip">
+          <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Uloga </th>
+          <td mat-cell *matCellDef="let z" style="text-align: center;"> 
+            <span class="status-badge"
+              [ngClass]="{
+                'g': z.tip === 'G',
+                'r': z.tip === 'R',
+                'k': z.tip === 'K'
+              }">
+              {{getTipNaziv(z.tip)}}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nazivPozorista">
+          <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Pozorište </th>
+          <td mat-cell *matCellDef="let z" style="text-align: center;" > {{z.nazivPozorista}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      </table>
+    </div>
+
+  </div>
+
+</mat-drawer-container>

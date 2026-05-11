@@ -1,0 +1,88 @@
+<div class="container">
+  
+  <!-- KREIRANJE PREDSTAVE -->
+  <mat-card class="form-card" [class.locked]="predstavaId">
+    <mat-card-header>
+      <mat-card-title>1. Osnovni podaci o predstavi</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="form-grid">
+        <div class="inputs">
+          <mat-form-field appearance="outline">
+            <mat-label>Naziv predstave</mat-label>
+            <input matInput [(ngModel)]="naziv" [disabled]="predstavaId !== null">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pozorište</mat-label>
+            <mat-select [(ngModel)]="pozoristeId" [disabled]="predstavaId !== null">
+              <mat-option *ngFor="let p of pozorista" [value]="p.id">{{p.naziv}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="file-upload">
+            <label>Poster predstave:</label>
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" [disabled]="predstavaId !== null">
+          </div>
+        </div>
+
+        <div class="image-preview" *ngIf="slikaPreview">
+          <img [src]="slikaPreview" alt="Preview">
+        </div>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end" *ngIf="!predstavaId">
+      <button mat-raised-button color="primary" (click)="kreirajOsnovno()">
+        KREIRAJ I NASTAVI
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- DODAVANJE TIMA -->
+  <div class="team-section" *ngIf="predstavaId" [@fadeIn]>
+    <div class="grid-layout">
+      
+      <!-- Lista dostupnih zaposlenih -->
+      <mat-card class="list-card">
+        <mat-card-header>
+          <mat-card-title>Izaberite umetnike</mat-card-title>
+          <mat-card-subtitle>Prikazani su samo zaposleni iz izabranog pozorišta</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-selection-list [multiple]="false">
+            <mat-list-option *ngFor="let z of dostupniZaposleni" (click)="dodajUcesnika(z)">
+              <mat-icon matListItemIcon>person</mat-icon>
+              <div matListItemTitle>{{z.imePrezime}}</div>
+              <div matListItemLine>{{getTipLabel(z.tip)}}</div>
+              <button mat-icon-button matListItemMeta color="primary">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Trenutni tim predstave -->
+      <mat-card class="list-card team-card">
+        <mat-card-header>
+          <mat-card-title>Umetnički tim predstave</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="empty-team" *ngIf="dodatiUcesnici.length === 0">
+            Tim je prazan. Dodajte reditelja, kostimografe i glumce.
+          </div>
+          <mat-list>
+            <mat-list-item *ngFor="let u of dodatiUcesnici">
+              <mat-icon matListItemIcon color="accent">check_circle</mat-icon>
+              <div matListItemTitle>{{u.imePrezime}}</div>
+              <div matListItemLine>{{getTipLabel(u.tip)}}</div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  </div>
+</div>
