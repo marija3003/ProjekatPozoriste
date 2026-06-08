@@ -9,8 +9,8 @@
 
         public string ImeKupca { get; set; }
 
-        public int ProdavacId { get; set; }
-        public Zaposleni Prodavac { get; set; }
+        public int? ProdavacId { get; set; }
+        public Zaposleni? Prodavac { get; set; }
 
         public DateTime DatumKupovine { get; set; }
     }

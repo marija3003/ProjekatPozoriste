@@ -18,7 +18,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 
-builder.Services.AddScoped<PredstavaService>();
+builder.Services.AddScoped<IPredstavaService, PredstavaService>();
+builder.Services.AddScoped<IKartaService, KartaService>();
+builder.Services.AddScoped<IPozoristeService, PozoristeService>();
+builder.Services.AddScoped<IZaposleniService, ZaposleniService>();
 
 
 builder.Services.AddCors(options =>
@@ -35,19 +38,14 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-   // app.MapOpenApi(); 
+  //app.MapOpenApi(); 
     app.UseSwagger(); 
     app.UseSwaggerUI(); 
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAngular");
 
-app.UseCors(options =>
-{
-    options.AllowAnyOrigin();
-    options.AllowAnyMethod();
-    options.AllowAnyHeader();
-});
 
 app.UseAuthorization();
 
@@ -69,6 +67,5 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseStaticFiles(); 
-app.UseCors("AllowAll");
+app.UseStaticFiles();
 app.Run();

@@ -1,0 +1,59 @@
+<div class="no-print container">
+
+  <h1>
+    <mat-icon>payments</mat-icon>
+    Administracija prodanih karata
+  </h1>
+
+ <app-table
+  [data]="(prodaneKarte$ | async) ?? []"
+  [columns]="columns"
+  (onPrint)="stampaj($event)"
+  (onUndo)="storniraj($event)">
+</app-table>
+</div>
+
+<!-- PRINT -->
+<div
+  class="print-only ticket-box"
+  *ngIf="odabranaKartaZaStampu">
+
+  <div class="ticket-header">
+    POZORIŠTE ULAZNICA 
+  </div>
+
+  <div class="ticket-body">
+
+    <h2>
+      {{ odabranaKartaZaStampu.predstava }}
+    </h2>
+
+    <p>
+      Datum:
+      {{ odabranaKartaZaStampu.datumPredstave | date:'dd.MM.yyyy HH:mm' }}
+    </p>
+
+    <p> 
+      Kupac:
+      <strong>
+        {{ odabranaKartaZaStampu.imeKupca }}
+      </strong>
+    </p>
+
+    <div class="seat-badge">
+
+      SJEDIŠTE:
+      {{ odabranaKartaZaStampu.brojSjedista }}
+
+    </div>
+
+  </div>
+
+  <div class="ticket-footer">
+
+    Cijena:
+    {{ odabranaKartaZaStampu.cijena }} KM
+
+  </div>
+
+</div>

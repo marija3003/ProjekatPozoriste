@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
-import { KupiKartuDTO, KartaDTO } from '../../models/ticketing.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { TerminDTO, KupiKartuDTO, KartaDTO, StanjeKarte } from '../../models/ticketing.model';
 
 @Component({
   selector: 'app-prodaja',
@@ -22,9 +22,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 })
 export class ProdajaComponent implements OnInit {
 
+  StanjeKarte = StanjeKarte;
+
   predstavaId!: number;
-  termini: any[] = [];
+  termini: TerminDTO[] = [];
   selectedTerminId: number | null = null;
+  selectedTermin: TerminDTO | null = null;
   karte: KartaDTO[] = [];
 
   selectedKarta: KartaDTO | null = null;
@@ -34,7 +37,6 @@ export class ProdajaComponent implements OnInit {
               private snackBar: MatSnackBar, private router: Router) { }
 
   ngOnInit(): void {
-
     this.predstavaId = Number(this.route.snapshot.paramMap.get('id'));
     this.ucitajTermine();
   }
@@ -52,25 +54,44 @@ export class ProdajaComponent implements OnInit {
 
   onTerminChange(){
     if (this.selectedTerminId){
+      this.selectedTermin = this.termini.find(t => t.id === this.selectedTerminId) ?? null;
+      if (this.selectedTermin && this.isTerminInPast(this.selectedTermin)){
+        this.snackBar.open('Termin je u prošlosti. Prodaja nije moguća.', 'Zatvori', {duration: 3000});
+        this.karte = [];
+        this.selectedKarta = null;
+        return;
+        
+      }
       this.ucitajSjedista();
       this.selectedKarta = null;
     }
   }
 
-  ucitajSjedista(){
-    
+  ucitajSjedista(){ 
     this.dataService.getKarteZaTermin(this.selectedTerminId!).subscribe(
       res =>{
         this.karte = res;
       });
-
   }
 
   odaberiSjediste(karta: KartaDTO){
 
-    if(karta.isProdata) return;
+    if (this.selectedTermin && this.isTerminInPast(this.selectedTermin)){
+      this.snackBar.open('Ne možete odabrati sjedište za termin u prošlosti.', 'Zatvori', {duration: 3000});
+      return;
+    }
+
+    if (!this.isSlobodno(karta)) return;
     this.selectedKarta = karta;
-    
+  }
+
+  isSlobodno(karta: KartaDTO){
+    return karta.stanje === StanjeKarte.Slobodna || karta.stanje === StanjeKarte.Stornirana;
+  }
+
+  private isTerminInPast(termin: TerminDTO){
+    const terminDate = new Date(termin.datumVrijeme).getTime();
+    return terminDate < Date.now();
   }
 
   potvrdiKupovinu(){
@@ -79,23 +100,20 @@ export class ProdajaComponent implements OnInit {
       return;
     }
 
-    const dto: KupiKartuDTO ={
+    const dto: KupiKartuDTO = {
       kartaId: this.selectedKarta.id,
       imeKupca: this.imeKupca,
-      prodavacId: 1
-      
+      // prodavacId: 1
     }
 
     this.dataService.prodajKartu(dto).subscribe({
       next: () => {
-        this.snackBar.open('Karta uspjesno prodata!', 'OK', {duration:3000});
+        this.snackBar.open('Karta uspješno prodana!', 'OK', {duration:3000});
         this.ucitajSjedista();
         this.selectedKarta = null;
         this.imeKupca = '';
-        
       },
-     error: (err) =>{ this.snackBar.open('Greska pri prodaji', 'Zatvori'), console.log(err)}
-
+     error: (err) =>{ this.snackBar.open('Greška pri prodaji', 'Zatvori'), console.log(err)}
     });
   }
 }

@@ -110,13 +110,23 @@ mat-card-actions {
   background: #fcfcfc;
   border-top: 1px solid #f0f0f0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end; 
 }
 
-.buy-button {
-  border-radius: 25px !important;
-  padding: 0 25px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+.delete-button {
+  background-color: #fcfcfcaa;
+  position: absolute;
+  border-radius: 30px;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.buy-button{
+ background-color:#fcfcfcaa !important;
+ color: gray;
+}
+
+.details-button{
+  margin-left: 10px;
 }

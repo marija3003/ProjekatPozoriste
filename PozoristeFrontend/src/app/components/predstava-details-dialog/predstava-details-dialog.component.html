@@ -1,0 +1,63 @@
+<div class="details-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>{{ data.naziv }}</h2>
+    <button mat-icon-button (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="content-grid">
+    <div class="image-section">
+      <img [src]= "data.putanjaSlike?.startsWith('http') ? data.putanjaSlike : baseUrl + data.putanjaSlike" 
+           alt="Poster" class="detail-img">
+    </div>
+
+    <div class="info-section">
+      <div class="info-item">
+        <mat-icon>home</mat-icon>
+        <div>
+          <label>Pozorište</label>
+          <p>{{ data.nazivPozorista }}</p>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="info-item">
+        <mat-icon>movie_filter</mat-icon>
+        <div>
+          <label>Reditelj</label>
+          <p>{{ data.reditelj }}</p>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="info-item">
+        <mat-icon>groups</mat-icon> 
+        <div>
+          <label>Glumačka postava</label>
+          <ul class="chips-list">
+            <li *ngFor="let glumac of data.glumci">{{ glumac }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <mat-divider *ngIf="data.kostimografi.length > 0"></mat-divider>
+
+      <div class="info-item" *ngIf="data.kostimografi.length > 0">
+        <mat-icon>palette</mat-icon>
+        <div>
+          <label>Kostimografija</label>
+          <p>{{ data.kostimografi.join(', ') }}</p>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button color="primary" (click)="dialogRef.close()">
+      Zatvori
+    </button>
+  </mat-dialog-actions>
+</div>

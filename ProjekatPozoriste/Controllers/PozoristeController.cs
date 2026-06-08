@@ -1,41 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProjekatPozoriste.Data;
 using ProjekatPozoriste.DTOs;
-using ProjekatPozoriste.Models;
+using ProjekatPozoriste.Services;
 
 namespace ProjekatPozoriste.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PozoristeController(AppDbContext context) : ControllerBase
+    public class PozoristeController(IPozoristeService pozoristeService) : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly IPozoristeService _pozoristeService = pozoristeService;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PozoristeDTO>>> GetPozorista()
         {
-            return Ok(await _context.Pozorista
-                .Select(p => new PozoristeDTO
-                    {
-                        Id = p.Id,
-                        Naziv = p.Naziv
-
-                    }).ToListAsync());
+            var pozorista = await _pozoristeService.GetPozoristaAsync();
+            return Ok(pozorista);
         }
 
         [HttpPost]
         public async Task<IActionResult> KreirajPozoriste(NovoPozoristeDTO dto)
         {
-            var pozoriste = new Pozoriste
-            {
-                Naziv = dto.Naziv
-            };
+           var message = await _pozoristeService.KreirajPozoristeAsync(dto);
 
-            _context.Pozorista.Add(pozoriste);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Pozoriste uspjesno kreirano" });
+            return Ok(new { message });
         }
     }
 }

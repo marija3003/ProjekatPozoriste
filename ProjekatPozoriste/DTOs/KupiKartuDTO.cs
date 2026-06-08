@@ -5,6 +5,6 @@
     {
         public int KartaId { get; set; }
         public string ImeKupca { get; set; }
-        public int ProdavacId { get; set; }
+        //public int? ProdavacId { get; set; }
     }
 }

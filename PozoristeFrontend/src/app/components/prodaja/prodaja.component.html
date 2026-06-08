@@ -24,10 +24,10 @@
       <div class="grid">
         <div *ngFor="let k of karte"
              class="seat"
-             [class.taken]="k.isProdata"
+             [class.taken]="!isSlobodno(k)"
              [class.selected]="selectedKarta?.id === k.id"
              (click)="odaberiSjediste(k)"> 
-          {{ k.brojSjedista }}
+          {{ k.brojSjedista }} 
         </div>
       </div>
 
@@ -41,8 +41,9 @@
    <aside class="checkout-card">
   <ng-container *ngIf="selectedKarta; else none">
 
-    <h3>Rezervacija</h3>
+    <h3>Kupi kartu</h3>
 
+    
     <div class="info-row">
       <span>Sjedište</span>
       <strong>{{ selectedKarta.brojSjedista }}</strong>
@@ -50,6 +51,7 @@
 
     <div class="info-row price">
       <span>Cijena</span>
+      
       <strong>{{ selectedKarta.cijena }} KM</strong>
     </div>
 

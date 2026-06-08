@@ -6,3 +6,9 @@
   max-width: none;
   margin: 0;
 }
+
+@media print{
+  .no-print {
+    display: none !important;
+  }
+}

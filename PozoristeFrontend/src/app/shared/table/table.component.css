@@ -1,0 +1,215 @@
+/* WRAPPER */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eef0f4;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.06),
+    0 2px 6px rgba(15, 23, 42, 0.04);
+
+  overflow: hidden;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* HEADER */
+th.mat-mdc-header-cell {
+  background: #f9fafb !important;
+
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+
+  padding: 18px 20px !important;
+
+  border-bottom: 1px solid #eef0f4;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* CELLS */
+td.mat-mdc-cell {
+  padding: 18px 20px !important;
+
+  text-align: center;
+  vertical-align: middle;
+
+  border-bottom: 1px solid #f1f3f7;
+
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+
+  transition: background 0.2s ease;
+}
+
+/* ROW */
+tr.mat-mdc-row {
+  transition: all 0.2s ease;
+}
+
+/* HOVER */
+tr.mat-mdc-row:hover {
+  background: #f8fafc;
+}
+
+/* ZEBRA */
+tr.mat-mdc-row:nth-child(even) {
+  background: #fcfcfd;
+}
+
+/* LAST ROW */
+tr.mat-mdc-row:last-child td {
+  border-bottom: none;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  width: 100%;
+}
+
+/* ICON BUTTON */
+.action-buttons button {
+  width: 36px;
+  height: 36px;
+
+  margin: 0 !important;
+
+  border-radius: 10px;
+
+  transition: all 0.2s ease;
+}
+
+/* EDIT / PRIMARY */
+.action-buttons button[color="primary"]:hover {
+  background: #eef2ff;
+  transform: translateY(-1px);
+}
+
+/* DELETE / WARN */
+.action-buttons button[color="warn"]:hover {
+  background: #fef2f2;
+  transform: translateY(-1px);
+}
+
+/* ICON */
+.action-buttons mat-icon {
+  font-size: 20px;
+}
+
+
+/* CHIP */
+mat-chip {
+  border-radius: 999px !important;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  padding: 4px 10px !important;
+}
+
+/* MATERIAL FIX */
+::ng-deep .mat-mdc-table {
+  background: transparent !important;
+}
+
+/* REMOVE DEFAULT MATERIAL SHADOW */
+.mat-elevation-z4 {
+  box-shadow: none !important;
+}
+
+.status-chip {
+  font-weight: 500;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  height: 24px;
+}
+
+/* Glumac */
+.status-chip[data-value="G"] {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+/* Reditelj */
+.status-chip[data-value="R"] {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Kostimograf */
+.status-chip[data-value="K"] {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  th.mat-mdc-header-cell,
+  td.mat-mdc-cell {
+    padding: 14px 12px !important;
+    font-size: 13px;
+  }
+
+  .action-buttons {
+    gap: 4px;
+  }
+
+  .action-buttons button {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  transition: 0.15s ease;
+}
+
+/* PRINT */
+.action-btn.print {
+  color: #2563eb;
+}
+
+.action-btn.print:hover {
+  background: rgba(37, 99, 235, 0.12);
+}
+
+/* EDIT */
+.action-btn.edit {
+  color: #2423206e;
+}
+
+.action-btn.edit:hover {
+  background: rgba(131, 139, 135, 0.09);
+  border-radius: 30px;
+}
+
+.action-btn mat-icon {
+  font-size: 20px;
+  line-height: 20px;
+}

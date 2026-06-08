@@ -1,3 +1,9 @@
+export enum StanjeKarte {
+   Slobodna = "Slobodna", 
+   Prodana = "Prodana",
+   Stornirana = "Stornirana"
+}
+
 export interface TerminDTO {
   id: number;
   datumVrijeme: Date;
@@ -8,13 +14,14 @@ export interface KartaDTO {
   id: number;
   brojSjedista: number;
   cijena: number;
-  isProdata: boolean;
+  //isProdata: boolean; 
+  stanje: StanjeKarte;
 }
 
 export interface KupiKartuDTO {
   kartaId: number;
   imeKupca: string;
-  prodavacId: number;
+  //prodavacId: number;
 }
 
 export interface NoviTerminDTO {

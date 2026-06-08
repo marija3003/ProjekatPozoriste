@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjekatPozoriste.Data;
 
@@ -11,9 +12,11 @@ using ProjekatPozoriste.Data;
 namespace ProjekatPozoriste.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260522075419_DodanStatusKarte")]
+    partial class DodanStatusKarte
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,7 +113,7 @@ namespace ProjekatPozoriste.Migrations
                     b.Property<int>("KartaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProdavacId")
+                    b.Property<int>("ProdavacId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -209,7 +212,9 @@ namespace ProjekatPozoriste.Migrations
 
                     b.HasOne("ProjekatPozoriste.Models.Zaposleni", "Prodavac")
                         .WithMany()
-                        .HasForeignKey("ProdavacId");
+                        .HasForeignKey("ProdavacId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Karta");
 

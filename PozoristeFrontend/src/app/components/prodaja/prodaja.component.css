@@ -142,6 +142,7 @@
   color: #222;
 }
 
+
 .info-row {
   width: 88%;
   display: flex;
@@ -214,4 +215,4 @@
 
 .mat-select-panel {
   border-radius : 30px;
-}
+} 

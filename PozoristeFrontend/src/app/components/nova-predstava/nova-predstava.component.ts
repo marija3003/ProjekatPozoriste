@@ -65,12 +65,12 @@ export class NovaPredstavaComponent implements OnInit {
     formData.append('slika', this.odabranaSlika);
 
     this.dataService.kreirajPredstavu(formData).subscribe({
-      next: (res: any)=>{
+      next: (res: any) => {
         this.predstavaId = res.id;
         this.snackbar.open('Predstava kreirana! Sada dodajte tim.', 'OK');
         this.ucitajZaposleneZaPozoriste();
       }, 
-      error: (err) => this.snackbar.open('Greska pri kreiranju', 'Zatvori')
+      error: (err) => this.snackbar.open('Greška pri kreiranju', 'Zatvori')
     });
   }
 
@@ -83,19 +83,18 @@ export class NovaPredstavaComponent implements OnInit {
   }
 
   dodajUcesnika(z: ZaposleniDTO){
-    if (z.tip === 'R' && this.dodatiUcesnici.some( u => u.tip === 'R'))
-    {
-        this.snackbar.open('Predstava moze imati samo jednog reditelja!', 'Zatvori');
-        return;
+    if (z.tip === 'R' && this.dodatiUcesnici.some( u => u.tip === 'R')) {
+      this.snackbar.open('Predstava može imati samo jednog reditelja!', 'Zatvori');
+      return;
     }
 
-    if (z.tip === 'K' && this.dodatiUcesnici.filter(u=> u.tip === 'K').length >= 2){
-      this.snackbar.open('Maksimalno dva kostimorafa su dozvoljena!', 'Zatvori');
+    if (z.tip === 'K' && this.dodatiUcesnici.filter(u => u.tip === 'K').length >= 2){
+      this.snackbar.open('Dozvoljena su maksimalno dva kostimografa!', 'Zatvori');
       return;
     }
 
     if(this.dodatiUcesnici.some(u => u.id === z.id)){
-      this.snackbar.open("Ovaj umjetnik je vec u timu!", 'Zatvori');
+      this.snackbar.open("Ovaj umjetnik je već u timu!", 'Zatvori');
       return;
     }
 
@@ -109,12 +108,11 @@ export class NovaPredstavaComponent implements OnInit {
         this.dodatiUcesnici.push(z);
         this.snackbar.open (`$(z.imePrezime) dodan u tim!`, 'OK', {duration: 2000});
       },
-      error: (err) => this.snackbar.open(err.error || 'Greska', 'Zatvori')
+      error: (err) => this.snackbar.open(err.error || 'Greška', 'Zatvori')
     });  
    
   }
 
- 
   getTipLabel(tip: string){
     if (tip === 'G') return 'Glumac';
     if (tip === 'K') return 'Kostimograf';

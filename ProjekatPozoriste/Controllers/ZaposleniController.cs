@@ -1,99 +1,69 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProjekatPozoriste.Data;
 using ProjekatPozoriste.DTOs;
-using ProjekatPozoriste.Enums;
-using ProjekatPozoriste.Models;
+using ProjekatPozoriste.Services;
 
 namespace ProjekatPozoriste.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ZaposleniController(AppDbContext context) : ControllerBase
+    public class ZaposleniController(IZaposleniService zaposleniService) : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly IZaposleniService _zaposleniService = zaposleniService;
 
-        //pregled svih zaposlenih (zaposleni njihovi profili i povezanost s pozoristem
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ZaposleniDTO>>> GetZaposleni()
         {
-            var zaposleni = await _context.Zaposleni
-                .Include(z => z.Pozoriste)
-                    .Select(z => new ZaposleniDTO
-                    {
-                        Id = z.Id,
-                        ImePrezime = z.Ime + " " + z.Prezime,
-                        Tip = z.Tip.ToString(),
-                        PozoristeId = z.PozoristeId,
-                        NazivPozorista = z.Pozoriste.Naziv
-                    }).ToListAsync();
-
-            return Ok(zaposleni);
+            return Ok(await _zaposleniService.GetZaposleniAsync());
         }
 
         [HttpPost]
         public async Task<IActionResult> KreirajZaposlenog(NoviZaposleniDTO dto)
         {
-            if (!Enum.TryParse(typeof(TipZaposlenog), dto.Tip, out var tipEnum))
-                return BadRequest("Nevalidan tip zaposlenog.");
+            var result = await _zaposleniService.KreirajZaposlenogAsync(dto);
 
-            var novi = new Zaposleni
-            {
-                Ime = dto.Ime,
-                Prezime = dto.Prezime,
-                Tip = (TipZaposlenog)tipEnum,
-                PozoristeId = dto.PozoristeId,
-            };
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-            _context.Zaposleni.Add(novi);
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Profil zaposlenog uspjesno kreiran." });
+            return Ok(new { message = result.Message });
         }
 
-        // filtriranje po tipu
         [HttpGet("Filter/{tip}")]
         public async Task<ActionResult<IEnumerable<ZaposleniDTO>>> GetPoTipu(string tip)
         {
+            var rezultat = await _zaposleniService.GetPoTipuAsync(tip);
 
-            if (!Enum.TryParse(typeof(TipZaposlenog), tip, out var tipEnum))
-            {
-                return BadRequest("Nevalidan tip zaposlenog. Koristite G, R ili K.");
-            }
-
-            var rezultat = await _context.Zaposleni
-                .Include(z => z.Pozoriste)
-                .Where(z => z.Tip == (TipZaposlenog)tipEnum)
-                .Select(z => new ZaposleniDTO
-                {
-                    Id = z.Id,
-                    ImePrezime = z.Ime + " " + z.Prezime,
-                    Tip = z.Tip.ToString(),
-                    PozoristeId = z.PozoristeId,
-                    NazivPozorista = z.Pozoriste.Naziv
-                })
-                .ToListAsync();
+            if (rezultat.Count == 0)
+                return BadRequest("Nevalidan tip zaposlenog.");
 
             return Ok(rezultat);
         }
 
-        //  pregled zaposlenih po pozoristu
         [HttpGet("Pozoriste/{pozoristeId}")]
         public async Task<ActionResult<IEnumerable<ZaposleniDTO>>> GetZaposleniPoPozoristu(int pozoristeId)
         {
-            var zaposleni = await _context.Zaposleni
-                .Where(z => z.PozoristeId == pozoristeId)
-                .Select(z => new ZaposleniDTO
-                {
-                    Id = z.Id,
-                    ImePrezime = z.Ime + " " + z.Prezime,
-                    Tip = z.Tip.ToString(),
-                    PozoristeId = z.PozoristeId,
-                    NazivPozorista = z.Pozoriste.Naziv
-                })
-                .ToListAsync();
-
-            return Ok(zaposleni);
+            return Ok(await _zaposleniService.GetPoPozoristuAsync(pozoristeId));
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateZaposleni(int id, NoviZaposleniDTO dto)
+        {
+            var result = await _zaposleniService.UpdateZaposleniAsync(id, dto);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { message = result.Message });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> ObrisiZaposlenog(int id)
+        {
+            var result = await _zaposleniService.ObrisiZaposlenogAsync(id);
+
+            if (!result.Success)
+                return NotFound(result.Message);
+
+            return Ok(new { message = result.Message });
+        }
     }
 }

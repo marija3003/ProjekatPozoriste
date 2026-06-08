@@ -7,10 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { PredstavaDetailsDialogComponent } from '../predstava-details-dialog/predstava-details-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-repertoar',
-  imports: [ CommonModule, MatCardModule, MatButtonModule, MatIconModule ],
+  imports: [ CommonModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './repertoar.component.html',
   styleUrls: ['./repertoar.component.css']
 })
@@ -20,8 +22,9 @@ export class RepertoarComponent implements OnInit {
 
   baseUrl: string ='http//localhost:7050/';
 
-
-  constructor(private dataService: DataService, private router: Router) { }
+  constructor(private dataService: DataService, 
+              private router: Router,
+              private dialog: MatDialog) { }
 
   ngOnInit(): void {
     //this.ucitajRepertoar();
@@ -44,4 +47,24 @@ export class RepertoarComponent implements OnInit {
     this.router.navigate(['/prodaja',predstavaId]);
   }
 
+  obrisiPredstavu(predstavaId: number) {
+    this.dataService.obrisiPredstavu(predstavaId).subscribe({
+      next: () => {
+        this.predstave$ = this.dataService.getRepertoar();
+      },
+      error: (err) => {
+        console.error('Greška pri brisanju predstave', err);
+      }
+    });
+  }
+
+  prikaziDetalje(predstava: PredstavaDTO){
+    this.dialog.open(PredstavaDetailsDialogComponent, {
+     data: predstava,
+     width: '1000px',
+     maxWidth: '95vw',
+     maxHeight: '95vh',
+     panelClass: 'custom-dialog-container'
+    });
+  }
 }
