@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjekatPozoriste.Data;
 
@@ -11,9 +12,11 @@ using ProjekatPozoriste.Data;
 namespace ProjekatPozoriste.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615071435_nullablepicturepath")]
+    partial class nullablepicturepath
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace ProjekatPozoriste.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("PredstavaZaposleni", b =>
-                {
-                    b.Property<int>("PredstaveId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UcesniciId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PredstaveId", "UcesniciId");
-
-                    b.HasIndex("UcesniciId");
-
-                    b.ToTable("PredstavaZaposleni");
-                });
 
             modelBuilder.Entity("ProjekatPozoriste.Models.Karta", b =>
                 {
@@ -172,6 +160,9 @@ namespace ProjekatPozoriste.Migrations
                     b.Property<int>("PozoristeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PredstavaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Prezime")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -183,22 +174,9 @@ namespace ProjekatPozoriste.Migrations
 
                     b.HasIndex("PozoristeId");
 
+                    b.HasIndex("PredstavaId");
+
                     b.ToTable("Zaposleni");
-                });
-
-            modelBuilder.Entity("PredstavaZaposleni", b =>
-                {
-                    b.HasOne("ProjekatPozoriste.Models.Predstava", null)
-                        .WithMany()
-                        .HasForeignKey("PredstaveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ProjekatPozoriste.Models.Zaposleni", null)
-                        .WithMany()
-                        .HasForeignKey("UcesniciId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProjekatPozoriste.Models.Karta", b =>
@@ -259,6 +237,10 @@ namespace ProjekatPozoriste.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ProjekatPozoriste.Models.Predstava", null)
+                        .WithMany("Ucesnici")
+                        .HasForeignKey("PredstavaId");
+
                     b.Navigation("Pozoriste");
                 });
 
@@ -272,6 +254,8 @@ namespace ProjekatPozoriste.Migrations
             modelBuilder.Entity("ProjekatPozoriste.Models.Predstava", b =>
                 {
                     b.Navigation("Termini");
+
+                    b.Navigation("Ucesnici");
                 });
 
             modelBuilder.Entity("ProjekatPozoriste.Models.Termin", b =>

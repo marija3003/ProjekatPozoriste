@@ -1,34 +1,65 @@
-.container { padding: 30px; }
-.table-wrapper { border-radius: 10px; overflow: hidden; margin-top: 20px; }
-table { width: 100%; }
+.container h1 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 34px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: clamp(2.3rem, 5vw, 4.6rem);
+}
 
-/* DIZAJN KARTE */
+.container h1 mat-icon {
+  width: 42px;
+  height: 42px;
+  color: var(--gold);
+  font-size: 42px;
+}
+
 .ticket-box {
-  width: 400px;
-  border: 2px solid #000;
-  padding: 20px;
+  width: 420px;
+  padding: 24px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  color: var(--ink);
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Inter', sans-serif;
+}
+
+.ticket-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ticket-body h2 {
+  margin: 22px 0 16px;
+  font-size: 2.5rem;
+  line-height: 1;
 }
 
 .seat-badge {
-  font-size: 24px;
-  font-weight: bold;
-  border: 1px solid #000;
-  margin: 15px 0;
-  padding: 10px;
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px solid var(--ink);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.ticket-footer {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-strong);
+  color: var(--muted-fg);
 }
 
 @media screen {
-  .print-only { display: none; }
+  .print-only {
+    display: none;
+  }
 }
 
 @media print {
-
-  .no-print {
-    display: none !important;
-  }
-
   app-root > *:not(.print-only) {
     display: none !important;
   }
@@ -41,12 +72,9 @@ table { width: 100%; }
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 350px;
-    padding: 20px;
-    background: white;
-    border: 2px solid black;
     z-index: 9999;
+    width: 350px;
+    transform: translate(-50%, -50%);
   }
 }
 

@@ -5,10 +5,17 @@
   padding: 0;
   max-width: none;
   margin: 0;
+  margin-left: 264px;
 }
 
 @media print{
   .no-print {
     display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-container {
+    margin-left: 0;
   }
 }

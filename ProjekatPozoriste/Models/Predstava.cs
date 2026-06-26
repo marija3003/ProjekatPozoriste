@@ -7,7 +7,7 @@
 
         public int PozoristeId { get; set; }
 
-        public string PutanjaSlike { get; set;}
+        public string? PutanjaSlike { get; set;}
         public Pozoriste Pozoriste { get; set; }
         public List<Zaposleni> Ucesnici { get; set; } = [];
         public List<Termin> Termini { get; set; } = [];

@@ -6,9 +6,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { PredstavaDetailsDialogComponent } from '../predstava-details-dialog/predstava-details-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
+import { combineLatest, map, Observable, switchMap } from 'rxjs';
+import { PozoristeDTO } from '../../models/theater.model';
 
 @Component({
   selector: 'app-repertoar',
@@ -19,52 +19,61 @@ import { MatDialog } from '@angular/material/dialog';
 export class RepertoarComponent implements OnInit {
 
   predstave$!: Observable<PredstavaDTO[]>;
+  pozorista$!: Observable<PozoristeDTO[]>;
+  activeTheatre$!: Observable<PozoristeDTO | null>;
+  theatreId: number | null = null;
 
   baseUrl: string ='http//localhost:7050/';
 
   constructor(private dataService: DataService, 
               private router: Router,
-              private dialog: MatDialog) { }
+              private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    //this.ucitajRepertoar();
-    this.predstave$ = this.dataService.getRepertoar();
+    this.pozorista$ = this.dataService.getPozorista();
+
+    const routeTheatre$ = this.route.paramMap.pipe(
+      map(params => {
+        const id = params.get('theatreId');
+        this.theatreId = id ? Number(id) : null;
+        return this.theatreId;
+      })
+    );
+
+    this.activeTheatre$ = combineLatest([this.pozorista$, routeTheatre$]).pipe(
+      map(([pozorista, theatreId]) => pozorista.find(p => p.id === theatreId) ?? null)
+    );
+
+    this.predstave$ = this.activeTheatre$.pipe(
+      switchMap((pozoriste) => this.dataService.getRepertoar().pipe(
+        map(predstave => pozoriste
+          ? predstave.filter(p => p.nazivPozorista === pozoriste.naziv)
+          : predstave
+        )
+      ))
+    );
   }
 
-  // ucitajRepertoar() {
-  
-  //   this.dataService.getRepertoar().subscribe({
-  //     next: (data) => {
-  //       this.predstave = data;
-  //      },
-  //     error: (err) => {
-  //       console.error('Greška u pretplati:', err);
-  //     }
-  //   });
-  // }
-
   kupiKartu(predstavaId: number){
-    this.router.navigate(['/prodaja',predstavaId]);
+    if (this.theatreId) {
+      this.router.navigate(['/theatres', this.theatreId, 'predstave', predstavaId]);
+      return;
+    }
+    this.router.navigate(['/prodaja', predstavaId]);
   }
 
   obrisiPredstavu(predstavaId: number) {
     this.dataService.obrisiPredstavu(predstavaId).subscribe({
       next: () => {
-        this.predstave$ = this.dataService.getRepertoar();
+        this.ngOnInit();
       },
       error: (err) => {
-        console.error('Greška pri brisanju predstave', err);
+        console.error('Greška pri brisanju predstave', err); 
       }
     });
   }
 
   prikaziDetalje(predstava: PredstavaDTO){
-    this.dialog.open(PredstavaDetailsDialogComponent, {
-     data: predstava,
-     width: '1000px',
-     maxWidth: '95vw',
-     maxHeight: '95vh',
-     panelClass: 'custom-dialog-container'
-    });
+    this.kupiKartu(predstava.id);
   }
 }

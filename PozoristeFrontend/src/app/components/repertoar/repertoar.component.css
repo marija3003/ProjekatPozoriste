@@ -1,132 +1,159 @@
 /* Glavni kontejner */
-.repertoar-container {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
+.container {
+  padding: 40px 4%;
+  min-height: 60vh;
+  background-size: 30px 30px;
+}
+/* Header */
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 35px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 15px;
 }
 
-/* Stil zaglavlja */
-.repertoar-header {
-  text-align: left;
-  margin-bottom: 80px;
+.logo-block h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 42px;
+  font-style: italic;
+  margin: 0;
 }
 
-.repertoar-header h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #2c3e50;
-  letter-spacing: -1px;
-  margin-bottom: 20px;
-}
 
-/* linija ispod naslova */
-.repertoar-header::after {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 4px;
-  background: #3f51b5; 
-  margin: 2 auto;
-  border-radius: 2px;
-}
-
-/* Grid sistem */
+/* GRID */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px 25px;
 }
 
-/* Stil kartice */
+/* CARD */
 .predstava-card {
-  border-radius: 15px; 
-  overflow: hidden;
-  border: none;
-  background: #ffffff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* Hover efekat na karticu */
-.predstava-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-}
-
-/* Slika unutar kartice */
-.card-img {
+/* IMAGE / VISUAL */
+.visual-box {
+  background-color: #f1eee6;
+  aspect-ratio: 4 / 2;
   width: 100%;
-  height: 220px;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-  background-color: #f8f9fa;
-}
-
-.predstava-card:hover .card-img {
-  transform: scale(1.05); /*  zum slike na hover */
-}
-
-/* Sadržaj kartice */
-mat-card-header {
-  padding: 20px 20px 10px 20px;
-}
-
-mat-card-title {
-  font-size: 1.4rem !important;
-  font-weight: 700 !important;
-  color: #2c3e50;
-  margin-bottom: 7px !important;
-}
-
-mat-card-subtitle {
-  color: #3f51b5 !important;
-  font-weight: 600 !important;
-  text-transform: uppercase;
-  font-size: 0.8rem !important;
-  letter-spacing: 2px;
-}
-
-mat-card-content {
-  padding: 0 20px 20px 20px;
-  flex-grow: 1;
-  color: #5a6c7d;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-/* Redovi sa informacijama (Reditelj, Glumci) */
-.info-row {
-  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Akcije (Dugme) */
-mat-card-actions {
-  padding: 15px 20px !important;
-  background: #fcfcfc;
-  border-top: 1px solid #f0f0f0;
+.predstava-card:hover .visual-box {
+  background-color: #ebe7dd;
+  transform: translateY(-4px);
+}
+
+/* LABEL */
+.scene-label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.22em;
+  margin-bottom: 10px;
+  font-variant: all-small-caps;
+}
+
+/* TITLE */
+.card-main-title {
+  font-size: 2.2rem;
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: -0.8px;
+}
+
+/* FOOTER */
+.card-footer-info {
+  margin-top: 15px;
+}
+
+.title-price-row {
   display: flex;
-  justify-content: flex-end; 
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
 }
 
-.delete-button {
-  background-color: #fcfcfcaa;
-  position: absolute;
-  border-radius: 30px;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
+.footer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-.buy-button{
- background-color:#fcfcfcaa !important;
- color: gray;
+.footer-price {
+  font-size: 0.8rem;
+  color: var(--muted-fg);
+  font-weight: 500;
 }
 
-.details-button{
-  margin-left: 10px;
+/* META */
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted-fg);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-item mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* DELETE BUTTON */
+.delete-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  cursor: pointer;
+  color: var(--muted-fg);
+
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  transition: color 0.2s ease;
+}
+
+.delete-action mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.delete-action:hover {
+  color: #a3865d;
+}
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .card-main-title {
+    font-size: 1.8rem;
+  }
 }

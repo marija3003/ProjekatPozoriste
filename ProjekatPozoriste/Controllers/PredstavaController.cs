@@ -41,7 +41,7 @@ namespace ProjekatPozoriste.Controllers
         [HttpPost("dodaj-ucesnika")]
         public async Task<IActionResult> DodajUcesnika(DodajUcesnikaDTO dto)
         {
-            var (success, message) = await _predstavaService.DodajUcesnika(dto.PredstavaId, dto.ZaposleniId);
+            var (success, message) = await _predstavaService.DodajUcesnikaAsync(dto.PredstavaId, dto.ZaposleniId);
 
             if (!success) return BadRequest(message);
             return Ok(new { message });

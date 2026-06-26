@@ -1,66 +1,215 @@
-/* .container{
-    padding: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+.wizard-page {
+  padding: 20px 5%;
+  background: #f9f8f4;
+  min-height: 100vh;
 }
 
-.form-card {
-    border-radius: 15px;
-    transition: 0.3s;
-    margin-bottom: 30px;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #a3865d;
+  cursor: pointer;
+  margin-bottom: 12px;
 }
 
-.form-card.locked {
-    background-color: #f8f9fa;
-    opacity: 0.9;
-    border: 2px solid #2ecc71;
+.display-title {
+  font-size: 2rem;
+  margin: 5px 0 25px;
+  letter-spacing: -1px;
+}
+/* Stepper */
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 25px;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 30px; 
+.step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #999;
+  margin-bottom: 30px;
 }
 
-.inputs{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.step.active {
+  background: #1c1917;
+  color: white;
+  border-color: #1c1917;
 }
 
-.image-preview img {
-    width:100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+.step.done {
+  background: #a3865d;
+  color: white;
+  border-color: #a3865d;
 }
 
-.file-upload {
-    margin: 15px 0;
-    display:flex;
-    flex-direction: column;
-    gap: 5px;
+.step-line {
+  width: 60px;
+  height: 1px;
+  background: #ddd;
+  margin-bottom: 30px;
 }
 
-.grid-layout{
-    display: grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px
+.wizard-card-wrapper {
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.02);
 }
 
-.list-card {
-    border-radius: 15px;
-    min-height: 400px; 
+.label-gold {
+  color: #a3865d;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  display: block;
+  margin-top: 15px;
 }
 
-.team-card{
-    border-left: 5px solid #ff4081;
+.big-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #1c1917;
+  font-size: 1.5rem;
+  padding: 8px 0;
+  outline: none;
+  margin-bottom: 12px;
+  font-style: italic;
 }
 
-.empty-team {
-    text-align: centar;
-    padding: 40px;
-    color: #999;
-    font-style: italic;
-} */
+.editorial-textarea {
+  width: 100%;
+  height: 70px;
+  border: 1px solid #eee;
+  padding: 10px;
+  margin-top: 8px;
+  outline: none;
+}
+
+.selection-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.selection-card {
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.selection-card:hover {
+  border-color: #a3865d;
+}
+
+.selection-card.selected {
+  background: #1c1917;
+  color: white;
+  border-color: #1c1917;
+}
+
+.actor-style.selected {
+  background: #1c1917;
+}
+
+.counter-label {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 30px;
+}
+
+.wizard-footer {
+   display: flex; 
+   align-items: center; 
+   margin-top: 40px;
+ } 
+
+.btn-editorial-dark { 
+  background: #1c1917;
+  color: white; 
+  border: none; 
+  padding: 18px 35px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+} 
+
+.btn-editorial-gold { 
+  background: #a3865d; 
+  color: white; 
+  border: none;
+  padding: 18px 35px; 
+  font-weight: 700; 
+  cursor: pointer;
+} 
+
+.small-input {
+  border-bottom-color: #1c1917;
+  border-top: transparent;
+  border-left: transparent;
+  border-right: transparent;
+  border-width: 1px;
+}
+
+.btn-ghost { 
+  background: none; 
+  border: none;
+  color: #999; 
+  font-weight: 700; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+}
+
+.term-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.termini-lista {
+  margin-top: 15px;
+}
+
+.termin-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid #eee;
+  margin-bottom: 8px;
+}
+
+.termin-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid #eee;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}

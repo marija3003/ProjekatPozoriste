@@ -8,7 +8,170 @@ namespace ProjekatPozoriste.Services
 {
     public class PredstavaService(AppDbContext context, IWebHostEnvironment env) : IPredstavaService
     {
-        public async Task<(bool Success, string Message)> DodajUcesnika(int predstavaId, int zaposleniId)
+        public async Task<List<PredstavaDTO>> GetRepertoarAsync()
+        {
+            var predstave = await context.Predstave
+                .Include(p => p.Pozoriste)
+                .Include(p => p.Ucesnici)
+                .ToListAsync();
+
+            return [.. predstave.Select(p => new PredstavaDTO
+            {
+                Id = p.Id,
+                Naziv = p.Naziv,
+                NazivPozorista = p.Pozoriste.Naziv,
+                PutanjaSlike = p.PutanjaSlike,
+
+                Reditelj =
+                    p.Ucesnici.FirstOrDefault(u => u.Tip == TipZaposlenog.R)?.Ime + " " +
+                    p.Ucesnici.FirstOrDefault(u => u.Tip == TipZaposlenog.R)?.Prezime
+                    ?? "Nije dodijeljen",
+
+                Glumci = [.. p.Ucesnici
+                    .Where(u => u.Tip == TipZaposlenog.G)
+                    .Select(u => u.Ime + " " + u.Prezime)],
+
+                Kostimografi = [.. p.Ucesnici
+                    .Where(u => u.Tip == TipZaposlenog.K)
+                    .Select(u => u.Ime + " " + u.Prezime)]
+            })];
+        }
+
+        
+        public async Task<int> KreirajPredstavuAsync(NovaPredstavaDTO dto)
+        {
+            string? putanjaSlike = null;
+
+            if (dto.Slika != null)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Predstave");
+                Directory.CreateDirectory(folderPath);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(dto.Slika.FileName);
+                var fullPath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await dto.Slika.CopyToAsync(stream);
+                }
+
+                putanjaSlike = $"Uploads/Predstave/{fileName}";
+            }
+
+            var predstava = new Predstava
+            {
+                Naziv = dto.Naziv,
+                PozoristeId = dto.PozoristeId,
+                PutanjaSlike = putanjaSlike
+            };
+
+            context.Predstave.Add(predstava);
+            await context.SaveChangesAsync();
+
+            foreach (var datum in dto.Termini)
+            {
+                await KreirajTerminIKarte(predstava.Id, datum);
+            }
+
+            return predstava.Id;
+        }
+
+        
+        public async Task<(bool Success, string Message)> DodajTerminAsync(NoviTerminDTO dto)
+        {
+            await KreirajTerminIKarte(dto.PredstavaId, dto.DatumVrijeme);
+            return (true, "Termin i karte uspješno kreirani.");
+        }
+
+        private async Task KreirajTerminIKarte(int predstavaId, DateTime datum)
+        {
+            var termin = new Termin
+            {
+                PredstavaId = predstavaId,
+                DatumVrijeme = datum
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var karte = new List<Karta>();
+
+            for (int i = 1; i <= 30; i++)
+            {
+                karte.Add(new Karta
+                {
+                    TerminId = termin.Id,
+                    BrojSjedista = i,
+                    Stanje = StanjeKarte.Slobodna,
+                    Cijena = 10
+                });
+            }
+
+            context.Karte.AddRange(karte);
+            await context.SaveChangesAsync();
+        }
+
+        
+        public async Task<(bool Success, string Message)> ObrisiPredstavuAsync(int id)
+        {
+            var predstava = await context.Predstave
+                .Include(p => p.Ucesnici)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (predstava == null)
+                return (false, "Predstava nije pronađena.");
+
+            var termini = await context.Termini
+                .Where(t => t.PredstavaId == id)
+                .ToListAsync();
+
+            var terminIds = termini.Select(t => t.Id).ToList();
+
+            var karte = await context.Karte
+                .Where(k => terminIds.Contains(k.TerminId))
+                .ToListAsync();
+
+            context.Karte.RemoveRange(karte);
+            context.Termini.RemoveRange(termini);
+
+            predstava.Ucesnici.Clear();
+
+            context.Predstave.Remove(predstava);
+
+            await context.SaveChangesAsync();
+
+            return (true, "Predstava uspješno obrisana.");
+        }
+
+        
+        public async Task<List<object>> GetTerminiAsync(int predstavaId)
+        {
+            return await context.Termini
+                .Where(t => t.PredstavaId == predstavaId)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.DatumVrijeme
+                })
+                .ToListAsync<object>();
+        }
+
+     
+        public async Task<List<KartaDTO>> GetKarteZaTerminAsync(int terminId)
+        {
+            return await context.Karte
+                .Where(k => k.TerminId == terminId)
+                .Select(k => new KartaDTO
+                {
+                    Id = k.Id,
+                    BrojSjedista = k.BrojSjedista,
+                    Cijena = k.Cijena,
+                    Stanje = k.Stanje
+                })
+                .ToListAsync();
+        }
+
+        public async Task<(bool Success, string Message)> DodajUcesnikaAsync(int predstavaId, int zaposleniId)
         {
             var predstava = await context.Predstave
                 .Include(p => p.Ucesnici)
@@ -45,184 +208,33 @@ namespace ProjekatPozoriste.Services
 
 
             predstava.Ucesnici.Add(radnik);
-            await context.SaveChangesAsync(); 
+            await context.SaveChangesAsync();
 
             return (true, "Uspješno dodan učesnik.");
         }
-       
 
-         
-        public async Task<List<PredstavaDTO>> GetRepertoarAsync()
-        {
-            var predstave = await context.Predstave
-                .Include(p => p.Pozoriste)
-                .Include(p => p.Ucesnici)
-                .ToListAsync();
+        //public async Task<(bool Success, string Message)> DodajUcesnikaAsync(int predstavaId, int zaposleniId)
+        //{
+        //    var predstava = await context.Predstave
+        //        .Include(p => p.Ucesnici)
+        //        .FirstOrDefaultAsync(p => p.Id == predstavaId);
 
-            return [.. predstave.Select(p => new PredstavaDTO
-            {
-                Id = p.Id,
-                Naziv = p.Naziv,
-                NazivPozorista = p.Pozoriste.Naziv,
-                PutanjaSlike = p.PutanjaSlike,
+        //    var zaposleni = await context.Zaposleni.FindAsync(zaposleniId);
 
-                Reditelj =
-                    p.Ucesnici.FirstOrDefault(u => u.Tip == TipZaposlenog.R)?.Ime
-                    + " " +
-                    p.Ucesnici.FirstOrDefault(u => u.Tip == TipZaposlenog.R)?.Prezime
-                    ?? "Nije dodijeljen",
+        //    if (predstava == null || zaposleni == null)
+        //        return (false, "Predstava ili zaposleni ne postoje.");
 
-                Glumci = [.. p.Ucesnici
-                    .Where(u => u.Tip == TipZaposlenog.G)
-                    .Select(u => u.Ime + " " + u.Prezime)],
+        //    if (zaposleni.PozoristeId != predstava.PozoristeId)
+        //        return (false, "Mora biti isto pozorište!");
 
-                Kostimografi = [.. p.Ucesnici
-                    .Where(u => u.Tip == TipZaposlenog.K)
-                    .Select(u => u.Ime + " " + u.Prezime)]
-                
-            })];
-        }
+        //    if (predstava.Ucesnici.Any(u => u.Id == zaposleniId))
+        //        return (false, "Zaposleni je već dodan.");
 
+        //    predstava.Ucesnici.Add(zaposleni);
 
-        public async Task<int> KreirajPredstavuAsync(NovaPredstavaDTO dto)
-        {
-            string? putanjaSlike = null;
+        //    await context.SaveChangesAsync();
 
-            if (dto.Slika != null)
-            {
-                var folderPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "Uploads",
-                    "Predstave"
-                );
-
-                Directory.CreateDirectory(folderPath);
-
-                var fileName = Guid.NewGuid().ToString() +
-                               Path.GetExtension(dto.Slika.FileName);
-
-                var fullPath = Path.Combine(folderPath, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await dto.Slika.CopyToAsync(stream);
-                }
-
-                putanjaSlike = $"Uploads/Predstave/{fileName}";
-            }
-            var novaPredstava = new Predstava
-            {
-                Naziv = dto.Naziv,
-                PozoristeId = dto.PozoristeId,
-                PutanjaSlike = putanjaSlike
-            };
-
-            context.Predstave.Add(novaPredstava);
-
-            await context.SaveChangesAsync();
-
-            return novaPredstava.Id;
-        }
-        public async Task<(bool Success, string Message)> DodajTerminAsync(NoviTerminDTO dto)
-        {
-            var termin = new Termin
-            {
-                PredstavaId = dto.PredstavaId,
-                DatumVrijeme = dto.DatumVrijeme
-            };
-
-            context.Termini.Add(termin);
-
-            await context.SaveChangesAsync();
-
-            for (int i = 1; i <= 30; i++)
-            {
-                context.Karte.Add(new Karta
-                {
-                    TerminId = termin.Id,
-                    BrojSjedista = i,
-                    Stanje = StanjeKarte.Slobodna,
-                    Cijena = 10
-                });
-            }
-
-            await context.SaveChangesAsync();
-
-            return (true, "Termin i karte uspješno kreirani.");
-        }
-
-        public async Task<(bool Success, string Message)> DodajUcesnikaAsync(int predstavaId, int zaposleniId)
-        {
-            var predstava = await context.Predstave
-                .Include(p => p.Ucesnici)
-                .FirstOrDefaultAsync(p => p.Id == predstavaId);
-
-            var zaposleni = await context.Zaposleni.FindAsync(zaposleniId);
-
-            if (predstava == null || zaposleni == null)
-                return (false, "Predstava ili zaposleni ne postoje.");
-
-            if (predstava.Ucesnici.Any(u => u.Id == zaposleniId))
-                return (false, "Zaposleni je već dodan.");
-
-            predstava.Ucesnici.Add(zaposleni);
-
-            await context.SaveChangesAsync();
-
-            return (true, "Učesnik uspješno dodan.");
-        }
-
-
-        public async Task<(bool Success, string Message)> ObrisiPredstavuAsync(int id)
-        {
-            var predstava = await context.Predstave.FindAsync(id);
-
-            if (predstava == null)
-                return (false, "Predstava nije pronađena.");
-
-            var karte = context.Karte
-                .Where(k => k.Termin.PredstavaId == id);
-
-            context.Karte.RemoveRange(karte);
-
-            var termini = context.Termini
-                .Where(t => t.PredstavaId == id);
-
-            context.Termini.RemoveRange(termini);
-
-            context.Predstave.Remove(predstava);
-
-            await context.SaveChangesAsync();
-
-            return (true, "Predstava uspješno obrisana.");
-        }
-
-        public async Task<List<object>> GetTerminiAsync(int predstavaId)
-        {
-            return await context.Termini
-                .Where(t => t.PredstavaId == predstavaId)
-                .Select(t => new
-                {
-                    t.Id,
-                    t.DatumVrijeme
-                })
-                .Cast<object>()
-                .ToListAsync();
-        }
-        
-        
-        public async Task<List<KartaDTO>> GetKarteZaTerminAsync(int terminId)
-        {
-            return await context.Karte
-                .Where(k => k.TerminId == terminId)
-                .Select(k => new KartaDTO
-                {
-                    Id = k.Id,
-                    BrojSjedista = k.BrojSjedista,
-                    Cijena = k.Cijena,
-                    Stanje = k.Stanje
-                })
-                .ToListAsync();
-        }
+        //    return (true, "Učesnik uspješno dodan.");
+        //}
     }
 }

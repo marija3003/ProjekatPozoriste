@@ -1,150 +1,121 @@
-<mat-drawer-container class="container">
+<div class="ansambl-page">
+  <header class="page-header">
+    <div class="label-utility">Organizaciona Struktura</div>
+    <h1 class="font-serif italic">Ansambl</h1>
+  </header>
 
-  <mat-drawer #drawer mode="over" position="end" class="drawer">
+  <!-- SEKCIJA: REDITELJI -->
+  <section class="role-section">
+    <header class="section-header">
+      <div class="title-group">
+        <h2 class="font-serif">Reditelji</h2>
+        <span class="count" *ngIf="reditelji$ | async as r">{{ r.length }}</span>
+      </div>
+      <button class="add-link" (click)="prikaziFormu('R')">+ DODAJ</button>
+    </header>
 
-    <div class="drawer-header">
-      <h2>
-        {{ isEditMode ? 'Uredi zaposlenog' : 'Novi profil zaposlenog' }}
-      </h2>
+    <!-- INLINE FORMA -->
+    <div class="inline-form" *ngIf="activeAddType === 'R'">
+      <input type="text" [(ngModel)]="noviZaposleni.ime" placeholder="Ime i prezime" class="editorial-input">
+      <button class="save-btn" (click)="sacuvaj()">SAČUVAJ</button>
+      <button class="cancel-btn" (click)="activeAddType = null"><mat-icon>close</mat-icon></button>
     </div>
 
-    <form #zaposleniForm="ngForm">
+      <div class="names-grid">
+        <div class="name-item" *ngFor="let z of (reditelji$ | async)" [class.is-editing]="editingId === z.id">
 
-      <div class="form-grid">
-        
-        <mat-form-field appearance="outline">
+          <ng-container *ngIf="editingId !== z.id">
+            <span class="name" (click)="handleEdit(z)">{{ z.imePrezime }}</span>
+            <div class="item-actions">
+              <button class="edit-btn" (click)="handleEdit(z)"><mat-icon>edit</mat-icon></button>
+              <button class="delete-btn" (click)="obrisi(z.id)">×</button>
+            </div>
+          </ng-container>
+          
+          <div class="edit-row" *ngIf="editingId === z.id">
+            <input type="text" [(ngModel)]="editModel.ime" class="edit-input-small" placeholder="Ime">
+            <input type="text" [(ngModel)]="editModel.prezime" class="edit-input-small" placeholder="Prezime">
+            <button class="mini-save-btn" (click)="sacuvajIzmjenu()">OK</button>
+            <button class="mini-cancel-btn" (click)="odustaniOdIzmjene()">×</button>
+          </div>
 
-          <mat-label>Ime</mat-label>
-
-          <input
-            matInput
-            name="ime"
-            required
-            minlength="2"
-            [(ngModel)]="noviZaposleni.ime"
-            #ime="ngModel">
-
-          <mat-error *ngIf="ime.errors?.['required']">
-            Ime je obavezno 
-          </mat-error>
-
-          <mat-error *ngIf="ime.errors?.['minlength']">
-            Minimum 2 karaktera
-          </mat-error>
-
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline">
-
-          <mat-label>Prezime</mat-label>
-
-          <input
-            matInput
-            name="prezime"
-            required
-            minlength="2"
-            [(ngModel)]="noviZaposleni.prezime"
-            #prezime="ngModel">
-
-          <mat-error *ngIf="prezime.errors?.['required']">
-            Prezime je obavezno
-          </mat-error>
-
-          <mat-error *ngIf="prezime.errors?.['minlength']">
-            Minimum 2 karaktera
-          </mat-error>
-
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline">
-
-          <mat-label>Uloga / Tip</mat-label>
-          <mat-select
-            name="tip"
-            required
-            [(ngModel)]="noviZaposleni.tip"
-            #tip="ngModel">
-            
-            <mat-option value="G">Glumac</mat-option>
-            <mat-option value="R">Reditelj</mat-option>
-            <mat-option value="K">Kostimograf</mat-option>
-
-          </mat-select>
-
-          <mat-error *ngIf="tip.errors?.['required']">
-            Odaberite ulogu
-          </mat-error>
-
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-
-          <mat-label>Pozorište</mat-label>
-
-          <mat-select
-            name="pozoristeId"
-            required
-            [(ngModel)]="noviZaposleni.pozoristeId"
-            #pozoriste="ngModel">
-
-            <mat-option
-              *ngFor="let p of (pozorista$ | async) ?? []"
-              [value]="p.id">
-
-              {{ p.naziv }}
-
-            </mat-option>
-
-          </mat-select>
-
-          <mat-error *ngIf="pozoriste.errors?.['required']">
-            Odaberite pozorište 
-          </mat-error>
-
-        </mat-form-field>
-
+        </div>
       </div>
+  </section>
 
-      <div class="actions">
-
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="zaposleniForm.invalid"
-          (click)="sacuvaj(); drawer.close()">
-
-          {{ isEditMode ? 'SAČUVAJ IZMJENE' : 'DODAJ ZAPOSLENOG' }}
-
-        </button>
-
+  <!-- SEKCIJA: KOSTIMOGRAFI -->
+  <section class="role-section">
+    <header class="section-header">
+      <div class="title-group">
+        <h2 class="font-serif">Kostimografi</h2>
+        <span class="count" *ngIf="kostimografi$ | async as k">{{ k.length }}</span>
       </div>
+      <button class="add-link" (click)="prikaziFormu('K')">+ DODAJ</button>
+    </header>
 
-    </form>
-
-  </mat-drawer>
-
-  <div class="content">
-
-    <div class="toolbar">
-
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="otvoriZaDodavanje()">
-
-        <mat-icon>add</mat-icon>
-        Novi zaposleni
-
-      </button>
-
+     <div class="inline-form" *ngIf="activeAddType === 'K'">
+      <input type="text" [(ngModel)]="noviZaposleni.ime" placeholder="Ime i prezime" class="editorial-input">
+      <button class="save-btn" (click)="sacuvaj()">SAČUVAJ</button>
+      <button class="cancel-btn" (click)="activeAddType = null"><mat-icon>close</mat-icon></button>
     </div>
 
-    <app-table
-      [data]="(zaposleni$ | async) ?? []"
-      [columns]="cols"
-      (onEdit)="handleEdit($event)"
-      (onDelete)="handleDelete($event)">
-    </app-table>
+      <div class="names-grid">
+        <div class="name-item" *ngFor="let z of (kostimografi$ | async)" [class.is-editing]="editingId === z.id">
 
-  </div>
-</mat-drawer-container>
+          <ng-container *ngIf="editingId !== z.id">
+            <span class="name" (click)="handleEdit(z)">{{ z.imePrezime }}</span>
+            <div class="item-actions">
+              <button class="edit-btn" (click)="handleEdit(z)"><mat-icon>edit</mat-icon></button>
+              <button class="delete-btn" (click)="obrisi(z.id)">×</button>
+            </div>
+          </ng-container>
+          
+          <div class="edit-row" *ngIf="editingId === z.id">
+            <input type="text" [(ngModel)]="editModel.ime" class="edit-input-small" placeholder="Ime">
+            <input type="text" [(ngModel)]="editModel.prezime" class="edit-input-small" placeholder="Prezime">
+            <button class="mini-save-btn" (click)="sacuvajIzmjenu()">OK</button>
+            <button class="mini-cancel-btn" (click)="odustaniOdIzmjene()">×</button>
+          </div>
+
+        </div>
+      </div>
+  </section>
+
+  <!-- SEKCIJA: GLUMCI -->
+  <section class="role-section">
+    <header class="section-header">
+      <div class="title-group">
+        <h2 class="font-serif">Glumci</h2>
+        <span class="count" *ngIf="glumci$ | async as g">{{ g.length }}</span>
+      </div>
+      <button class="add-link" (click)="prikaziFormu('G')">+ DODAJ</button>
+    </header>
+
+    <div class="inline-form" *ngIf="activeAddType === 'G'">
+      <input type="text" [(ngModel)]="noviZaposleni.ime" placeholder="Ime i prezime" class="editorial-input">
+      <button class="save-btn" (click)="sacuvaj()">SAČUVAJ</button>
+      <button class="cancel-btn" (click)="activeAddType = null"><mat-icon>close</mat-icon></button>
+    </div>
+
+      <div class="names-grid">
+        <div class="name-item" *ngFor="let z of (glumci$ | async)" [class.is-editing]="editingId === z.id">
+
+          <ng-container *ngIf="editingId !== z.id">
+            <span class="name" (click)="handleEdit(z)">{{ z.imePrezime }}</span>
+            <div class="item-actions">
+              <button class="edit-btn" (click)="handleEdit(z)"><mat-icon>edit</mat-icon></button>
+              <button class="delete-btn" (click)="obrisi(z.id)">×</button>
+            </div>
+          </ng-container>
+          
+          <div class="edit-row" *ngIf="editingId === z.id">
+            <input type="text" [(ngModel)]="editModel.ime" class="edit-input-small" placeholder="Ime">
+            <input type="text" [(ngModel)]="editModel.prezime" class="edit-input-small" placeholder="Prezime">
+            <button class="mini-save-btn" (click)="sacuvajIzmjenu()">OK</button>
+            <button class="mini-cancel-btn" (click)="odustaniOdIzmjene()">×</button>
+          </div>
+
+        </div>
+      </div>
+  </section>
+</div>

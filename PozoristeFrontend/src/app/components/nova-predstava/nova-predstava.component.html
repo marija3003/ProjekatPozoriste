@@ -1,88 +1,122 @@
-<div class="container">
-  
-  <!-- KREIRANJE PREDSTAVE -->
-  <mat-card class="form-card" [class.locked]="predstavaId">
-    <mat-card-header>
-      <mat-card-title>1. Osnovni podaci o predstavi</mat-card-title>
-    </mat-card-header>
+<div class="wizard-page fade-up">
+  <nav class="breadcrumb" (click)="router.navigate(['/theatres', theatreId])">
+    <mat-icon>west</mat-icon> REPERTOAR
+  </nav>
+
+  <h1 class="font-serif display-title">Nova predstava</h1>
+
+  <!-- STEPPER (1-2-3-4) -->
+  <div class="stepper-container">
+    <div class="step" [class.active]="currentStep === 1" [class.done]="currentStep > 1">1</div>
+    <div class="step-line"></div>
+    <div class="step" [class.active]="currentStep === 2" [class.done]="currentStep > 2">2</div>
+    <div class="step-line"></div>
+    <div class="step" [class.active]="currentStep === 3" [class.done]="currentStep > 3">3</div>
+    <div class="step-line"></div>
+    <div class="step" [class.active]="currentStep === 4" [class.done]="currentStep > 4">4</div>
+  </div>
+
+  <div class="wizard-card-wrapper">
     
-    <mat-card-content>
-      <div class="form-grid">
-        <div class="inputs">
-          <mat-form-field appearance="outline">
-            <mat-label>Naziv predstave</mat-label>
-            <input matInput [(ngModel)]="naziv" [disabled]="predstavaId !== null">
-          </mat-form-field>
+    <!-- KORAK 1 -->
+    <div *ngIf="currentStep === 1" class="step-content">
+      <h2 class="font-serif">Osnovni podaci</h2>
+      <div class="editorial-form">
+        <label class="label-gold">NAZIV PREDSTAVE</label>
+        <input type="text" [(ngModel)]="naziv" placeholder="npr. Gospođa ministarka" class="big-input font-serif">
+        
+          <label class="label-gold">CIJENA KARTE (KM)</label>
+        <input type="number" [(ngModel)]="cijena" class="small-input">
+      </div>
+      
+     <label class="label-gold">TERMIN PREDSTAVE</label>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Pozorište</mat-label>
-            <mat-select [(ngModel)]="pozoristeId" [disabled]="predstavaId !== null">
-              <mat-option *ngFor="let p of pozorista" [value]="p.id">{{p.naziv}}</mat-option>
-            </mat-select>
-          </mat-form-field>
+      <div class="term-row">
+        <input
+          type="datetime-local"
+          [(ngModel)]="noviTermin"
+          class="small-input">
+        <button
+          type="button"
+          class="btn-editorial-gold"
+          (click)="dodajTermin()">
+          Dodaj
+        </button>
+      </div>
 
-          <div class="file-upload">
-            <label>Poster predstave:</label>
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" [disabled]="predstavaId !== null">
-          </div>
-        </div>
+      <div class="termini-lista">
+        <div *ngFor="let termin of termini; let i = index"
+            class="termin-card">
+          <span>{{ termin | date:'dd.MM.yyyy HH:mm' }}</span>
 
-        <div class="image-preview" *ngIf="slikaPreview">
-          <img [src]="slikaPreview" alt="Preview">
+          <button
+            type="button"
+            class="btn-ghost"
+            (click)="obrisiTermin(i)">
+            Ukloni
+          </button>
         </div>
       </div>
-    </mat-card-content>
-
-    <mat-card-actions align="end" *ngIf="!predstavaId">
-      <button mat-raised-button color="primary" (click)="kreirajOsnovno()">
-        KREIRAJ I NASTAVI
-      </button>
-    </mat-card-actions>
-  </mat-card>
-
-  <!-- DODAVANJE TIMA -->
-  <div class="team-section" *ngIf="predstavaId" [@fadeIn]>
-    <div class="grid-layout">
-      
-      <!-- Lista dostupnih zaposlenih -->
-      <mat-card class="list-card">
-        <mat-card-header>
-          <mat-card-title>Izaberite umetnike</mat-card-title>
-          <mat-card-subtitle>Prikazani su samo zaposleni iz izabranog pozorišta</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-selection-list [multiple]="false">
-            <mat-list-option *ngFor="let z of dostupniZaposleni" (click)="dodajUcesnika(z)">
-              <mat-icon matListItemIcon>person</mat-icon>
-              <div matListItemTitle>{{z.imePrezime}}</div>
-              <div matListItemLine>{{getTipLabel(z.tip)}}</div>
-              <button mat-icon-button matListItemMeta color="primary">
-                <mat-icon>add_circle</mat-icon>
-              </button>
-            </mat-list-option>
-          </mat-selection-list>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Trenutni tim predstave -->
-      <mat-card class="list-card team-card">
-        <mat-card-header>
-          <mat-card-title>Umjetnički tim predstave</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="empty-team" *ngIf="dodatiUcesnici.length === 0">
-            Tim je prazan. Dodajte reditelja, kostimografe i glumce.
-          </div>
-          <mat-list>
-            <mat-list-item *ngFor="let u of dodatiUcesnici">
-              <mat-icon matListItemIcon color="accent">check_circle</mat-icon>
-              <div matListItemTitle>{{u.imePrezime}}</div>
-              <div matListItemLine>{{getTipLabel(u.tip)}}</div>
-            </mat-list-item>
-          </mat-list>
-        </mat-card-content>
-      </mat-card>
-
     </div>
+
+    <!-- KORAK 2: REDITELJ -->
+    <div *ngIf="currentStep === 2" class="step-content">
+      <h2 class="font-serif">Reditelj</h2>
+      <p class="helper-text">Predstava mora imati tačno jednog reditelja.</p>
+      <div class="selection-grid">
+        <div *ngFor="let z of reditelji" 
+             class="selection-card" 
+             [class.selected]="selectedDirector?.id === z.id"
+             (click)="selectedDirector = z">
+          <span>{{ z.imePrezime }}</span>
+          <div class="radio-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KORAK 3: KOSTIMOGRAFI -->
+    <div *ngIf="currentStep === 3" class="step-content">
+      <h2 class="font-serif">Kostimografi</h2>
+      <p class="helper-text">Maksimalno 2 kostimografa. Polje je opciono.</p>
+      <div class="selection-grid">
+        <div *ngFor="let z of kostimografi" 
+             class="selection-card" 
+             [class.selected]="selectedCostumers.includes(z)"
+             (click)="toggleCostumer(z)">
+          <span>{{ z.imePrezime }}</span>
+        </div>
+      </div>
+      <div class="counter-label">ODABRANO: {{ selectedCostumers.length }} / 2</div>
+    </div>
+
+    <!-- KORAK 4: GLUMCI -->
+    <div *ngIf="currentStep === 4" class="step-content">
+      <h2 class="font-serif">Glumci</h2>
+      <p class="helper-text">Predstava može imati neograničen broj glumaca.</p>
+      <div class="selection-grid">
+        <div *ngFor="let z of glumci" 
+             class="selection-card actor-style" 
+             [class.selected]="selectedActors.includes(z)"
+             (click)="toggleActor(z)">
+          <span>{{ z.imePrezime }}</span>
+          <mat-icon *ngIf="selectedActors.includes(z)">done</mat-icon>
+        </div>
+      </div>
+      <div class="counter-label">ODABRANO: {{ selectedActors.length }}</div>
+    </div>
+  </div>
+
+  <!-- FOOTER DUGMAD -->
+  <div class="wizard-footer">
+    <button class="btn-ghost" *ngIf="currentStep > 1" (click)="currentStep = currentStep - 1">
+      <mat-icon>west</mat-icon> NAZAD 
+    </button>
+    <div class="spacer"></div>
+    <button class="btn-editorial-dark" *ngIf="currentStep < 4" (click)="nextStep()">
+      SLEDEĆI KORAK <mat-icon>east</mat-icon>
+    </button>
+    <button class="btn-editorial-gold" *ngIf="currentStep === 4" (click)="finaliziraj()">
+      KREIRAJ PREDSTAVU
+    </button>
   </div>
 </div>

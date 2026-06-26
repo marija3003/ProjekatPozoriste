@@ -20,7 +20,7 @@ import { TableColumn } from '../../models/table.model';
 })
 export class UpravljanjeProdajomComponent implements OnInit {
 
-  private refresh$ = new BehaviorSubject<void>(undefined);
+  private refresh$ = new BehaviorSubject<void>(undefined); 
 
   prodaneKarte$!: Observable<any[]>;
 
@@ -67,7 +67,6 @@ export class UpravljanjeProdajomComponent implements OnInit {
     if (confirm('Da li želite stornirati ovu prodaju?')) {
 
       this.dataService.stornirajKartu(item.kartaId).subscribe({
-
         next: (res) => {
 
           this.snackBar.open(
@@ -91,7 +90,6 @@ export class UpravljanjeProdajomComponent implements OnInit {
   }
 
   stampaj(karta: any): void {
-    
     this.odabranaKartaZaStampu = karta;
     setTimeout(() => {
       window.print();

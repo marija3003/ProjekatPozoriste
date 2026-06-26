@@ -5,6 +5,7 @@
     {
         public string Naziv { get; set; }
         public int PozoristeId { get; set; }
-        public IFormFile Slika { get; set; }
+        public IFormFile? Slika { get; set; }
+        public List<DateTime> Termini { get; set; } = [];
     }
 }

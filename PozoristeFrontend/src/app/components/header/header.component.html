@@ -1,27 +1,62 @@
-<mat-toolbar color="primary" class="main-header">
-  <div class="logo-container" routerLink="/">
-    <mat-icon class="logo-xl">theater_comedy</mat-icon>
-    <span class="logo-text">POZORIŠTE<span class="logo-dot">.</span></span>
+<aside class="app-sidebar no-print">
+  <div class="brand" routerLink="/">
+    <span class="brand-kicker">THEATRUM</span>
+    <span class="brand-title">Repertoar</span>
   </div>
 
-  <span class="spacer"></span>
+  <div class="sidebar-section">
+    <span class="section-label">Institucije</span>
 
-  <!-- Navigacija -->
-  <nav class="nav-links">
-    <button mat-button routerLink="/repertoar" routerLinkActive="active-link">
-       Repertoar
-    </button>
+    <nav class="theatre-list" *ngIf="pozorista.length > 0; else emptyTheatres">
+      <a
+        *ngFor="let p of pozorista"
+        [routerLink]="theatreLink(p)"
+        routerLinkActive="active"
+        class="theatre-link">
+        <span class="theatre-avatar">{{ shortName(p.naziv) }}</span>
+        <span>{{ p.naziv }}</span>
+      </a>
+    </nav>
 
-    <button mat-button routerLink="/prodane" routerLinkActive="active-link">
-       Prodaja
-    </button>
-    
-    <button mat-button routerLink="/zaposleni" routerLinkActive="active-link">
-       Zaposleni
-    </button>
-    
-    <button mat-button routerLink="/nova-predstava" routerLinkActive="active-link" class="admin-btn">
-       Nova Predstava
-    </button>
+    <ng-template #emptyTheatres>
+      <p class="empty-nav">Nema unesenih pozorišta.</p>
+    </ng-template>
+  </div>
+
+  <div class="sidebar-footer">
+    <a
+      class="new-play-link"
+      [class.disabled]="!activeTheatreId"
+      [routerLink]="activeTheatreId ? ['/theatres', activeTheatreId, 'nova-predstava'] : null">
+      <mat-icon>add</mat-icon>
+      Nova predstava
+    </a>
+  </div>
+</aside>
+
+<header class="app-topbar no-print">
+  <div class="mobile-brand">
+    <span class="theatre-avatar">{{ theatreInitials }}</span>
+    <span>{{ activeTheatre?.naziv || 'Izaberite pozorište' }}</span>
+  </div>
+
+  <nav class="top-tabs" *ngIf="activeTheatreId">
+    <a
+      [routerLink]="['/theatres', activeTheatreId, 'repertoar']"
+      routerLinkActive="active">
+      Repertoar
+    </a>
+
+    <a
+      [routerLink]="['/theatres', activeTheatreId, 'ansambl']"
+      routerLinkActive="active">
+      Ansambl
+    </a>
+
+    <a
+      [routerLink]="['/theatres', activeTheatreId, 'nova-predstava']"
+      routerLinkActive="active">
+      Nova predstava
+    </a>
   </nav>
-</mat-toolbar>
+</header>

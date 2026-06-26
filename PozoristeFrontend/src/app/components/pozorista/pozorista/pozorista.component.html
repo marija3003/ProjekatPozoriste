@@ -1,0 +1,58 @@
+<div class="institutions-layout">
+
+  <!-- Content -->
+  <main class="content">
+
+    <div class="content-header">
+      <span class="eyebrow">PREGLED</span>
+
+      <h1>Institucije</h1>
+      <p>
+        Pozorišne kuće u sistemu. Otvorite instituciju za pregled
+        ansambla i tekućeg repertoara. 
+      </p>
+    </div>
+
+    <div class="cards-grid">
+
+      <div
+        *ngFor="let p of pozorista$ | async"
+        class="institution-card"
+        (click)="otvoriPozoriste(p.id)"
+      >
+
+        <div class="card-top">
+
+          <div class="badge large">
+            {{ getInitials(p.naziv) }}
+          </div>
+
+          <span class="open-link">
+            OTVORI → 
+          </span>
+
+        </div>
+
+        <h2>
+          {{ p.naziv }}
+        </h2>
+
+        <div class="card-footer">
+
+          <span>
+            {{ 0 }} PREDSTAVA
+          </span>
+
+          <span>
+            {{ 0 }} ČLANOVA ANSAMBLA
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

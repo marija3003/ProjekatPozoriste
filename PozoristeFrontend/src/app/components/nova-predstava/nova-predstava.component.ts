@@ -1,122 +1,194 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, input} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../services/data.service';
-import { PozoristeDTO } from '../../models/theater.model';
 import { ZaposleniDTO } from '../../models/staff.model';
-import { DodajUcesnikaDTO } from '../../models/show.model';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin } from 'rxjs'; 
+import { CommonModule } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-nova-predstava',
-  imports: [ CommonModule, FormsModule, 
-             MatFormFieldModule, MatInputModule, 
-             MatSelectModule, MatButtonModule, 
-             MatCardModule, MatIconModule,
-             MatListModule, MatSnackBarModule ],
   templateUrl: './nova-predstava.component.html',
+  imports: [ MatIcon, CommonModule, FormsModule],
   styleUrls: ['./nova-predstava.component.css']
 })
 export class NovaPredstavaComponent implements OnInit {
+  currentStep: number = 1;
+  theatreId!: number;
 
+  // Form podaci
   naziv: string = '';
-  pozoristeId: number = 0;
-  odabranaSlika: File | null = null;
-  slikaPreview: string | null = null;
+  opis: string = '';
+  cijena: number = 10;
+  predstavaId: number | null = null;
+  noviTermin: string = '';
+  termini: string[] = [];
 
-  predstavaId: number | null = null; 
-  pozorista: PozoristeDTO[] = [];
-  dostupniZaposleni: ZaposleniDTO[] = [];
-  dodatiUcesnici: ZaposleniDTO[] = [];
+  // Liste za selekciju (filtrirane po pozoristu)
+  reditelji: ZaposleniDTO[] = [];
+  kostimografi: ZaposleniDTO[] = [];
+  glumci: ZaposleniDTO[] = [];
 
-  constructor(private dataService: DataService, private snackbar: MatSnackBar) { }
-  
-  ngOnInit() : void {
-    this.dataService.getPozorista().subscribe(
-      res => this.pozorista = res
-    );
+  // Selekcije
+  selectedDirector: ZaposleniDTO | null = null;
+  selectedCostumers: ZaposleniDTO[] = [];
+  selectedActors: ZaposleniDTO[] = [];
+
+  constructor(
+    private route: ActivatedRoute,
+    public router: Router,
+    private dataService: DataService,
+    private snackbar: MatSnackBar
+  ) { }
+
+  ngOnInit(): void {
+    // 1. Pročitaj ID pozorišta iz URL-a
+    this.theatreId = Number(this.route.snapshot.paramMap.get('theatreId'));
+    
+    // 2. Učitaj zaposlene odmah da budu spremni za korake 2, 3 i 4
+    this.ucitajZaposlene();
   }
 
-  onFileSelected(event: any){
-    this.odabranaSlika = event.target.files[0];
-    if (this.odabranaSlika){
-      const reader = new FileReader();
-      reader.onload = (e: any) => this.slikaPreview = e.target.result;
-      reader.readAsDataURL(this.odabranaSlika);
-    }
-  } 
+  ucitajZaposlene() {
+    this.dataService.getZaposleniPoPozoristu(this.theatreId).subscribe(res => {
+      this.reditelji = res.filter(z => z.tip === 'R');
+      this.kostimografi = res.filter(z => z.tip === 'K');
+      this.glumci = res.filter(z => z.tip === 'G');
+    });
+  }
 
-  kreirajOsnovno(){
-    if (!this.naziv || this.pozoristeId === 0 || !this.odabranaSlika){
-      this.snackbar.open('Popunite sva polja i dodajte sliku!', 'OK');
+  nextStep() {
+    if (this.currentStep === 1) {
+      this.sacuvajPredstavuUBazu();
+    } else if (this.currentStep === 2 && !this.selectedDirector) {
+      this.snackbar.open('Morate odabrati reditelja!', 'Zatvori');
+    } else {
+      this.currentStep++;
+    }
+  }
+
+  dodajTermin() {
+    if (!this.noviTermin) {
       return;
     }
+    this.termini.push(this.noviTermin);
+    this.noviTermin = '';
+  }
+
+  obrisiTermin(index: number) {
+    this.termini.splice(index, 1);
+  }
+  
+  sacuvajPredstavuUBazu() {
+    if (!this.naziv) return;
 
     const formData = new FormData();
-    formData.append('naziv', this.naziv);
-    formData.append('pozoristeId', this.pozoristeId.toString());
-    formData.append('slika', this.odabranaSlika);
+
+    formData.append('Naziv', this.naziv);
+    formData.append('PozoristeId', this.theatreId.toString());
+
+    this.termini.forEach((t, index) => {
+      formData.append(`Termini[${index}]`, t);
+    });
 
     this.dataService.kreirajPredstavu(formData).subscribe({
       next: (res: any) => {
         this.predstavaId = res.id;
-        this.snackbar.open('Predstava kreirana! Sada dodajte tim.', 'OK');
-        this.ucitajZaposleneZaPozoriste();
-      }, 
-      error: (err) => this.snackbar.open('Greška pri kreiranju', 'Zatvori')
+        this.currentStep = 2;
+      },
+      error: () => this.snackbar.open('Greška pri kreiranju predstave.', 'OK')
     });
   }
 
-  ucitajZaposleneZaPozoriste(){
-    this.dataService.getZaposleniPoPozoristu(this.pozoristeId).subscribe(
-      res=> {
-        this.dostupniZaposleni = res;
+  // Selekcija kostimografa (max 2)
+  toggleCostumer(z: ZaposleniDTO) {
+    const idx = this.selectedCostumers.findIndex(i => i.id === z.id);
+    if (idx > -1) {
+      this.selectedCostumers.splice(idx, 1);
+    } else if (this.selectedCostumers.length < 2) {
+      this.selectedCostumers.push(z);
+    }
+  }
+
+  // Selekcija glumaca (neograničeno)
+  toggleActor(z: ZaposleniDTO) {
+    const idx = this.selectedActors.findIndex(i => i.id === z.id);
+    if (idx > -1) {
+      this.selectedActors.splice(idx, 1);
+    } else {
+      this.selectedActors.push(z);
+    }
+  }
+
+  // FINALNO: Slanje svih učesnika na backend
+ 
+  finaliziraj() {
+  if (!this.predstavaId) {
+    this.snackbar.open('Predstava nije kreirana!', 'OK');
+    return;
+  }
+
+  if (!this.selectedDirector) {
+    this.snackbar.open('Odaberite reditelja!', 'OK');
+    return;
+  }
+
+  if (this.selectedActors.length === 0) {
+    this.snackbar.open('Odaberite bar jednog glumca!', 'OK');
+    return;
+  }
+
+  // 1. PRVO reditelj
+  this.dataService.dodajUcesnika({
+    predstavaId: this.predstavaId,
+    zaposleniId: this.selectedDirector.id
+  }).subscribe({
+    next: () => {
+
+      // 2. Ostali učesnici (nakon reditelja)
+      const ostali: any[] = [];
+
+      // kostimografi
+      this.selectedCostumers.forEach(k => {
+        ostali.push(
+          this.dataService.dodajUcesnika({
+            predstavaId: this.predstavaId!,
+            zaposleniId: k.id
+          })
+        );
+      });
+
+      // glumci
+      this.selectedActors.forEach(g => {
+        ostali.push(
+          this.dataService.dodajUcesnika({
+            predstavaId: this.predstavaId!,
+            zaposleniId: g.id
+          })
+        );
+      });
+
+      if (ostali.length === 0) {
+        this.finishSuccess();
+        return;
       }
-    );
-  }
 
-  dodajUcesnika(z: ZaposleniDTO){
-    if (z.tip === 'R' && this.dodatiUcesnici.some( u => u.tip === 'R')) {
-      this.snackbar.open('Predstava može imati samo jednog reditelja!', 'Zatvori');
-      return;
+      forkJoin(ostali).subscribe({
+        next: () => this.finishSuccess(),
+        error: () =>
+          this.snackbar.open('Greška prilikom dodavanja tima.', 'OK')
+      });
+    },
+    error: () => {
+      this.snackbar.open('Greška pri dodavanju reditelja!', 'OK');
     }
+  });
+}
 
-    if (z.tip === 'K' && this.dodatiUcesnici.filter(u => u.tip === 'K').length >= 2){
-      this.snackbar.open('Dozvoljena su maksimalno dva kostimografa!', 'Zatvori');
-      return;
-    }
-
-    if(this.dodatiUcesnici.some(u => u.id === z.id)){
-      this.snackbar.open("Ovaj umjetnik je već u timu!", 'Zatvori');
-      return;
-    }
-
-    const dto: DodajUcesnikaDTO = {
-      predstavaId: this.predstavaId!,
-      zaposleniId: z.id
-    };
-
-    this.dataService.dodajUcesnika(dto).subscribe({
-      next: () => {
-        this.dodatiUcesnici.push(z);
-        this.snackbar.open (`$(z.imePrezime) dodan u tim!`, 'OK', {duration: 2000});
-      },
-      error: (err) => this.snackbar.open(err.error || 'Greška', 'Zatvori')
-    });  
-   
-  }
-
-  getTipLabel(tip: string){
-    if (tip === 'G') return 'Glumac';
-    if (tip === 'K') return 'Kostimograf';
-    if (tip === 'R') return 'Reditelj';
-    return '';
+  private finishSuccess() {
+    this.snackbar.open('Umjetnički tim uspješno formiran!', 'OK');
+    this.router.navigate(['/theatres', this.theatreId]);
   }
 }

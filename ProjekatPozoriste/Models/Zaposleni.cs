@@ -11,5 +11,7 @@ namespace ProjekatPozoriste.Models
 
         public int PozoristeId { get; set; }
         public Pozoriste Pozoriste { get; set; }
+        public List<Predstava> Predstave { get; set; } = [];
     }
+
 }

@@ -1,83 +1,120 @@
-<div class="prodaja-wrap">
+<div class="editorial-page fade-up">
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb" (click)="idiNazad()">
+    <mat-icon>west</mat-icon> REPERTOAR
+  </nav>
 
-  <header class="header">
-    <button mat-icon-button (click)="idiNazad()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+  <div class="main-layout" *ngIf="predstava">
+    
+    <!-- LIJEVA KOLONA: INFO -->
+    <aside class="info-column">
+      <div class="label-utility">Predstava</div>
+      <h2 class="font-serif italic display-title">{{ predstava.naziv }}</h2>
 
-    <h1>Prodaja karata</h1>
-
-    <mat-form-field appearance="fill" class="custom-select">
-      <mat-select [(ngModel)]="selectedTerminId" panelClass="topunit" (selectionChange)="onTerminChange()">
-        <mat-option *ngFor="let t of termini" [value]="t.id">
-          {{ t.datumVrijeme | date:'dd.MM.yyyy HH:mm' }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </header>
-
-  <main class="page">
-
-    <section class="sala-card">
-      <h3 class="stage">SCENA</h3>
-
-      <div class="grid">
-        <div *ngFor="let k of karte"
-             class="seat"
-             [class.taken]="!isSlobodno(k)"
-             [class.selected]="selectedKarta?.id === k.id"
-             (click)="odaberiSjediste(k)"> 
-          {{ k.brojSjedista }} 
+      <div class="cast-section">
+        <div class="label-group">
+          <span class="label-utility">REDITELJ</span>
+          <span class="value">{{ predstava.reditelj }}</span>
+        </div>
+        <div class="label-group" *ngIf="predstava.kostimografi.length">
+          <span class="label-utility">KOSTIMOGRAF</span>
+          <span class="value">{{ predstava.kostimografi.join(', ') }}</span>
         </div>
       </div>
 
-      <div class="legend">
-        <div><span class="dot free"></span>Slobodno</div>
-        <div><span class="dot taken"></span>Prodato</div>
-        <div><span class="dot selected"></span>Vaš izbor</div>
+      <div class="ensemble-list">
+        <div class="label-utility mb-4">ANSAMBL</div>
+        <div class="ensemble-item" *ngFor="let g of predstava.glumci; let i = index">
+          <span class="role-name">{{ i === 0 ? 'Glavna uloga' : 'Uloga' }}</span>
+          <span class="actor-name">{{ g }}</span>
+        </div>
       </div>
-    </section>
 
-   <aside class="checkout-card">
-  <ng-container *ngIf="selectedKarta; else none">
+      <div class="footer-meta">
+        <span>TRAJANJE · 120 MIN</span>
+        <span>CIJENA · 0 KM</span>
+      </div>
+    </aside>
 
-    <h3>Kupi kartu</h3>
+    <!-- DESNA KOLONA -->
 
+    <!-- DESNA KOLONA: MAPA I FORMA -->
+    <section class="action-column">
+      <div class="termin-picker">
+        <div class="label-utility">ODABERITE TERMIN</div>
+        <mat-select [(ngModel)]="selectedTerminId" (selectionChange)="onTerminChange()" class="editorial-select">
+          <mat-option *ngFor="let t of termini" [value]="t.id">
+            {{ t.datumVrijeme | date:'dd. MMMM yyyy. | HH:mm' }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="seat-map-card">
+        <div class="stage-label">SCENA</div>
+        
+        <div class="grid-container">
+          <div class="row" *ngFor="let row of sjedistaPoRedovima; let i = index">
+            <span class="row-label">{{ getRowLabel(i) }}</span>
+            <div class="seats">
+              <div *ngFor="let k of row" 
+                  class="seat-unit"
+                  [class.taken]="!isSlobodno(k)"
+                  [class.selected]="selectedKarta?.id === k.id"
+                  (click)="odaberiSjediste(k)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KUPOVINA FORMA -->
+        <div class="purchase-box" *ngIf="selectedKarta">
+          <div class="selected-info">
+            <span class="label-utility">ODABRANO SJEDIŠTE</span>
+            <div class="seat-value">{{ getFullSjedisteLabel(selectedKarta.brojSjedista) }}</div>
+          </div>
+        </div>
+        <div class="input-group"  *ngIf="selectedKarta">
+            <input type="text" [(ngModel)]="imeKupca" placeholder="Ime kupca" class="editorial-input">
+            <button class="btn-confirm" (click)="potvrdiKupovinu()">POTVRDI KUPOVINU</button>
+         </div>
     
-    <div class="info-row">
-      <span>Sjedište</span>
-      <strong>{{ selectedKarta.brojSjedista }}</strong>
+      </div>
+
+      <div class="map-legend">
+          <span><span class="dot free"></span> SLOBODNO</span>
+          <span><span class="dot taken"></span> ZAUZETO</span>
+          <span><span class="dot selected"></span> VAŠ IZBOR</span>
+        </div>
+    </section>
+  </div>
+  
+</div>
+ <div class="sold-tickets-section" *ngIf="prodaneKarte.length > 0">
+  <div class="label-utility-small">Prodane karte</div>
+
+  <div class="table-wrapper">
+      <table class="editorial-table">
+        <thead>
+          <tr>
+            <th>KOD</th>
+            <th>SJEDIŠTE</th>
+            <th>KUPAC</th>
+            <th>STATUS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of prodaneKarte">
+            <td class="mono">TKT-{{ p.kartaId }}</td>
+            <td>{{ getFullSjedisteLabel(p.brojSjedista) }}</td>
+            <td><strong>{{ p.imeKupca }}</strong></td>
+            <td><span class="status-tag">  {{ getStanjeKarte(p.kartaId) | uppercase}}</span></td>
+            <td class="text-right">
+              <button class="text-btn" (click)="stampaj(p)">ŠTAMPAJ</button>
+              <button class="text-btn red" (click)="storniraj(p.kartaId)">STORNIRAJ</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <div class="info-row price">
-      <span>Cijena</span>
-      
-      <strong>{{ selectedKarta.cijena }} KM</strong>
-    </div>
-
-    <mat-form-field appearance="outline" class="full-field">
-      <mat-label>Ime i prezime</mat-label>
-      <input matInput [(ngModel)]="imeKupca">
-    </mat-form-field>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="buy-button"
-      (click)="potvrdiKupovinu()">
-
-      Potvrdi kupovinu
-    </button>
-
-  </ng-container>
-
-  <ng-template #none>
-    <div class="empty-checkout">
-      <mat-icon>event_seat</mat-icon>
-      <p>Odaberite sjedište</p>
-    </div>
-  </ng-template>
-</aside>
-
-  </main>
 </div>

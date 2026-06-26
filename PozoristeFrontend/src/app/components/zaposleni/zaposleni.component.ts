@@ -1,210 +1,114 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { BehaviorSubject, Observable, switchMap } from 'rxjs';
-
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Observable, map, switchMap, combineLatest } from 'rxjs';
 import { DataService } from '../../services/data.service';
-
-import {
-  ZaposleniDTO,
-  NoviZaposleniDTO
-} from '../../models/staff.model';
-
-import { PozoristeDTO } from '../../models/theater.model';
-import { TableColumn } from '../../models/table.model';
-
-import { TableComponent } from '../../shared/table/table.component';
-
-import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { ZaposleniDTO, NoviZaposleniDTO } from '../../models/staff.model';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-zaposleni',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTableModule,
-    MatSidenavModule,
-    TableComponent
-  ],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './zaposleni.component.html',
   styleUrls: ['./zaposleni.component.css']
 })
 export class ZaposleniComponent implements OnInit {
-
-  @ViewChild('drawer') drawer!: MatSidenav;
-
-  isEditMode: boolean = false;
-  selectedId: number | null = null;
-
   private refresh$ = new BehaviorSubject<void>(undefined);
+  theatreId!: number;
 
-  zaposleni$!: Observable<ZaposleniDTO[]>;
-  pozorista$!: Observable<PozoristeDTO[]>;
+  reditelji$!: Observable<ZaposleniDTO[]>;
+  kostimografi$!: Observable<ZaposleniDTO[]>;
+  glumci$!: Observable<ZaposleniDTO[]>;
+
+  activeAddType: string | null = null;
+
+  editingId: number | null = null;
+  editModel: NoviZaposleniDTO = { ime: '', prezime: '', tip: '', pozoristeId: 1 };
 
   noviZaposleni: NoviZaposleniDTO = {
-    ime: '',
-    prezime: '',
-    tip: 'G',
-    pozoristeId: 0
+    ime: '', prezime: '', tip: 'G', pozoristeId: 1     
   };
 
-  cols: TableColumn[] = [
-    {
-      key: 'imePrezime',
-      label: 'Ime i Prezime',
-      type: 'text'
-    },
-    {
-      key: 'tip',
-      label: 'Uloga',
-      type: 'chip',
-      valueMap: {
-        G: { label: 'Glumac', class: 'chip-g' },
-        R: { label: 'Reditelj', class: 'chip-r' },
-        K: { label: 'Kostimograf', class: 'chip-k' }
-      }
-    },
-    {
-      key: 'nazivPozorista',
-      label: 'Pozorište',
-      type: 'text'
-    },
-    {
-      key: 'actions',
-      label: 'Akcije',
-      type: 'action',
-      actions: ['edit', 'delete']
-    }
-  ];
+  constructor(private dataService: DataService, private route: ActivatedRoute, private snackBar: MatSnackBar) { }
 
-  constructor(
-    private dataService: DataService,
-    private snackBar: MatSnackBar
-  ) { }
-
-  ngOnInit(): void {
-
-    this.zaposleni$ = this.refresh$.pipe(
-      switchMap(() => this.dataService.getZaposleni())
+   ngOnInit(): void {
+    // Slušati promjene u URL-u (ako korisnik pređe iz jednog pozorišta u drugo)
+    const data$ = combineLatest([this.route.params, this.refresh$]).pipe(
+      switchMap(([params, _]) => {
+        this.theatreId = +params['theatreId']; // uzeti ID iz rute
+        this.noviZaposleni.pozoristeId = this.theatreId; // setovati za nove unose
+        return this.dataService.getZaposleniPoPozoristu(this.theatreId);
+      })
     );
-
-    this.pozorista$ = this.dataService.getPozorista();
-   }
-
-  otvoriZaDodavanje(): void {
-
-    this.isEditMode = false;
-    this.selectedId = null;
-
-    this.noviZaposleni = {
-      ime: '',
-      prezime: '',
-      tip: 'G',
-      pozoristeId: 0
-    };
-
-    this.drawer.open();
-    
+   
+    this.reditelji$ = data$.pipe(map(list => list.filter(z => z.tip === 'R')));
+    this.kostimografi$ = data$.pipe(map(list => list.filter(z => z.tip === 'K')));
+    this.glumci$ = data$.pipe(map(list => list.filter(z => z.tip === 'G')));
   }
 
-  handleDelete(z: ZaposleniDTO): void {
+  prikaziFormu(tip: string) {
+    this.activeAddType = tip;
+    this.editingId = null;
+    this.noviZaposleni = { 
+      ime: '', 
+      prezime: '', 
+      tip: tip, 
+      pozoristeId: this.theatreId 
+    };
+  }
 
-    if (confirm(`Da li ste sigurni da želite obrisati ${z.imePrezime}?`)) {
+  sacuvaj(): void {
+      const parts = this.noviZaposleni.ime.trim().split(' ');
+      const payload = {
+        ...this.noviZaposleni,
+        ime: parts[0],
+        prezime: parts.slice(1).join(' '),
+        pozoristeId: this.theatreId
+      };
 
-      this.dataService.obrisiZaposlenog(z.id)
-        .subscribe(() => {
+      this.dataService.kreirajZaposlenog(payload).subscribe(() => {
+        this.refresh$.next();
+        this.activeAddType = null;
+        this.snackBar.open('Uspješno dodato u ansambl', 'OK');
+      });
+  }
 
-          this.refresh$.next();
-
-          this.snackBar.open(
-            'Zaposleni uspješno obrisan',
-            'OK',
-            { duration: 3000 }
-          );
-        });
+  obrisi(id: number) {
+    if(confirm('Ukloniti člana iz ansambla?')) {
+      this.dataService.obrisiZaposlenog(id).subscribe(() => this.refresh$.next());
     }
   }
 
   handleEdit(z: ZaposleniDTO): void {
+    this.editingId = z.id;
+    this.activeAddType = null;
 
-    this.isEditMode = true;
-    this.selectedId = z.id;
-
-    const splitImenaIPrezimena = z.imePrezime.split(' ');
-
-    this.noviZaposleni = {
-      ime: splitImenaIPrezimena[0],
-      prezime: splitImenaIPrezimena.slice(1).join(' '),
+    const parts = z.imePrezime.split(' ');
+    this.editModel = {
+      ime: parts[0],
+      prezime: parts.slice(1).join(' '),
       tip: z.tip,
       pozoristeId: z.pozoristeId
     };
-
-    this.drawer.open();
   }
 
-  sacuvaj(): void {
-
-    if (this.isEditMode && this.selectedId) {
-
-      this.dataService
-        .updateZaposlenog(this.selectedId, this.noviZaposleni)
-        .subscribe(() => {
-
-          this.zavrsiAkciju(
-            'Podaci uspješno izmijenjeni'
-          );
-        });
-
-    } else {
-
-      this.dataService
-        .kreirajZaposlenog(this.noviZaposleni)
-        .subscribe(() => {
-
-          this.zavrsiAkciju(
-            'Zaposleni uspješno dodan'
-          );
-        });
-    }
+  odustaniOdIzmjene(): void {
+    this.editingId = null;
   }
+ 
+  sacuvajIzmjenu(): void {
+    if (!this.editingId) return;
 
-  zavrsiAkciju(poruka: string): void {
-
-    this.snackBar.open(
-      poruka,
-      'OK',
-      { duration: 3000 }
-      
-    );
-
-    this.refresh$.next();
-    this.drawer.close();
-  }
-
-  getTipNaziv(tip: string): string {
-
-    if (tip === 'G') return 'Glumac';
-    if (tip === 'R') return 'Reditelj';
-    if (tip === 'K') return 'Kostimograf';
-    
-    return tip;
+    this.dataService.updateZaposlenog(this.editingId, this.editModel).subscribe({
+      next: () => {
+        this.snackBar.open('Izmjene sačuvane', 'OK', { duration: 2000 });
+        this.editingId = null;
+        this.refresh$.next();
+      },
+      error: (err) => console.error(err)
+    });
   }
 }
